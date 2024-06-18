@@ -1,4 +1,4 @@
-package com.splitwise.User.Service;
+package com.splitwise.microservices.user_service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

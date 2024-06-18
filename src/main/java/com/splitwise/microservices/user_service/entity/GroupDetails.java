@@ -1,0 +1,29 @@
+package com.splitwise.microservices.user_service.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.Date;
+
+@Entity
+@Table(name ="group_details")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class GroupDetails {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="grp_member_id")
+    private Long groupMemberId;
+    @Column(name="group_id")
+    private Long groupId;
+    @Column(name="user_id")
+    private Long userId;
+    @Column(name="join_date")
+    private Date joinedAt;
+}

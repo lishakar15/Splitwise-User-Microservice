@@ -1,4 +1,4 @@
-package com.splitwise.User.Service;
+package com.splitwise.microservices.user_service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
