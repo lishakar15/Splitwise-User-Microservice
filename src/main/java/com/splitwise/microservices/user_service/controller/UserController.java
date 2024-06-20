@@ -1,9 +1,11 @@
 package com.splitwise.microservices.user_service.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/user")
 public class UserController {
 
     @PostMapping("/register-user")
@@ -12,9 +14,11 @@ public class UserController {
 
     }
     @PostMapping("/login-user")
-    public void loginUser()
+    public ResponseEntity<String> loginUser()
     {
+        System.out.println("Login Successful!!");
         //Write code for Authentication
+        return new ResponseEntity<>("Login Successful", HttpStatus.ACCEPTED);
     }
 
     @GetMapping("/get-user/{userId}")
@@ -27,6 +31,12 @@ public class UserController {
     public void updateUserDetails()
     {
 
+    }
+
+    @GetMapping("/listUsers")
+    public void getAllUsers()
+    {
+        //Return all users
     }
 
 }
