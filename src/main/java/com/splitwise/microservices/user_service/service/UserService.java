@@ -1,9 +1,10 @@
 package com.splitwise.microservices.user_service.service;
 
-import org.springframework.stereotype.Service;
+import com.splitwise.microservices.user_service.entity.User;
 
-@Service
 public interface UserService {
 
+    public User saveUser(User user);
 
+    public String getUserPassword(String emailId);
 }

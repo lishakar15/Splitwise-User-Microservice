@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Entity
-@Table(name="user")
+@Table(name="user_details")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,9 +20,11 @@ public class User {
     @GeneratedValue(strategy =GenerationType.IDENTITY)
     @Column(name="id")
     private Long userId;
-    @Column(name="user_name")
-    private String userName;
-    @Column(name="email")
+    @Column(name="first_name",nullable = false)
+    private String firstName;
+    @Column(name="last_name",nullable = false)
+    private String lastName;
+    @Column(name="email_id")
     private String emailId;
     @Column(name="password")
     private String password;

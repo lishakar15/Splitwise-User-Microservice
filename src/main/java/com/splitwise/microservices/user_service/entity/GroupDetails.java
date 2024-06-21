@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Entity
-@Table(name ="group_details")
+@Table(name ="group_member_details")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
