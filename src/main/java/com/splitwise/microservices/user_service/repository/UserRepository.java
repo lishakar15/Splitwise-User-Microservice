@@ -6,11 +6,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface UserRepository extends JpaRepository<User,Long> {
 
     @Query
     public User getUserByEmailId(String emailId);
+    //Get user password by emailId
     @Query(value = "select u.password from user_details u where u.email_Id = :emailId LIMIT 1",nativeQuery =true)
     public String getUserPasswordByEmailId(@Param("emailId") String emailId);
+    //Get user password by phone number
+    @Query(value ="select u.password from user_details u where u.phone =:phoneNumber LIMIT 1", nativeQuery = true)
+    public String getUserPasswordByPhone(@Param("phoneNumber") String loginParameter);
+
 }

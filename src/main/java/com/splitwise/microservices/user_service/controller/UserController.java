@@ -1,12 +1,13 @@
 package com.splitwise.microservices.user_service.controller;
 
 import com.splitwise.microservices.user_service.entity.User;
-import com.splitwise.microservices.user_service.repository.UserRepository;
 import com.splitwise.microservices.user_service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/user")
@@ -23,20 +24,25 @@ public class UserController {
         {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+        //Todo Need to encrypt the password and save it
+        User savedUser = userService.saveUser(user);
+        if(null != savedUser)
+        {
+           return new ResponseEntity<>("User Saved successfully",HttpStatus.OK);
+        }
         else
         {
-            //Todo Need to encrypt the password and save it
-            User savedUser = userService.saveUser(user);
+            return new ResponseEntity<>("Error occurred while saving user details",HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>("User Saved successfully",HttpStatus.OK);
     }
     @PostMapping("/login-user")
-    public ResponseEntity<String> loginUser(@RequestParam("emailId") String emailId,@RequestParam("password") String password)
+    public ResponseEntity<String> loginUser(@RequestParam("loginParam") String loginParameter,
+                                            @RequestParam("password") String password)
     {
         //Write code for Authentication
     
         //Need to write code to decrypt password
-        String userPassword = userService.getUserPassword(emailId);
+        String userPassword = userService.getUserPassword(loginParameter);
         System.out.println("userPassword = " +userPassword);
         if(userPassword != null && userPassword.equals(password))
         {
@@ -50,14 +56,34 @@ public class UserController {
     }
 
     @GetMapping("/get-user/{userId}")
-    public void getUserDetails()
+    public ResponseEntity<User> getUserDetails(@PathVariable("userId")Long userId)
     {
-
+        if(userId == null)
+        {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Optional<User> optional = userService.getUserById(userId);
+        if(!optional.isPresent())
+        {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        else
+        {
+            return new ResponseEntity<>(optional.get(),HttpStatus.OK);
+        }
     }
 
-    @PutMapping("/update-user/")
-    public void updateUserDetails()
+    @PutMapping("/update-user")
+    public ResponseEntity<User> updateUserDetails(@RequestBody User user)
     {
+        //Todo Need to check if the id already exists and then update
+        if(user == null || user.getUserId() == null)
+        {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        User updatedUser = userService.saveUser(user);
+        System.out.println("User updated successfully");
+        return new ResponseEntity<>(updatedUser,HttpStatus.OK);
 
     }
 

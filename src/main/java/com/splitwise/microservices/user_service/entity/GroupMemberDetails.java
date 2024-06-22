@@ -14,7 +14,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GroupDetails {
+public class GroupMemberDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
