@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -113,10 +112,27 @@ public class GroupController {
         return new ResponseEntity<>(groupNames, HttpStatus.OK);
     }
 
+    /**
+     * Method to delete the group (Only Admin can perform this)
+     * @param groupId
+     */
     @DeleteMapping("/delete-group/{groupId}")
     public void deleteGroup(@PathVariable("groupId") Long groupId)
     {
+        //Todo add check for Admin user of the group
         groupService.deleteGroupAndMembers(groupId);
+    }
+
+    @DeleteMapping("/{userId}/leave-group/{groupId}")
+    public ResponseEntity<String> leaveGroup(@PathVariable("userId") Long userId,@PathVariable Long groupId)
+    {
+        //Todo Do check for any pending out standings
+        boolean isDeleted = groupService.deleteGroupMember(userId,groupId);
+        if(isDeleted)
+        {
+            return new ResponseEntity<>("You Left the group successfully", HttpStatus.OK);
+        }
+        return new ResponseEntity<>("Error occurred while performing leave group",HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

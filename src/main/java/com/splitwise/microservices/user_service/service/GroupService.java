@@ -47,4 +47,9 @@ public class GroupService{
         groupRepository.deleteById(groupId);
         groupMemberDetailsRepository.deleteByGroupId(groupId);
     }
+
+    public boolean deleteGroupMember(Long userId, Long groupId) {
+        int rowsAffected = groupMemberDetailsRepository.deleteGroupMember(userId,groupId);
+        return rowsAffected > 0 ? true : false;
+    }
 }
