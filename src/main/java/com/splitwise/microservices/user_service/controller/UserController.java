@@ -19,7 +19,6 @@ public class UserController {
     public ResponseEntity<String> registerUser(@RequestBody User user)
     {
         //Todo Check if email or phone number already exists if yes then redirect to login
-        System.out.println(user.toString());
         if(user == null)
         {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -43,10 +42,8 @@ public class UserController {
     
         //Need to write code to decrypt password
         String userPassword = userService.getUserPassword(loginParameter);
-        System.out.println("userPassword = " +userPassword);
         if(userPassword != null && userPassword.equals(password))
         {
-            System.out.println("User logged in successfully");
             return new ResponseEntity<>("Login Successful", HttpStatus.ACCEPTED);
         }
         else
@@ -82,7 +79,6 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         User updatedUser = userService.saveUser(user);
-        System.out.println("User updated successfully");
         return new ResponseEntity<>(updatedUser,HttpStatus.OK);
 
     }

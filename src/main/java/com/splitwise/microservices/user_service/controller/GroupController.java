@@ -36,17 +36,15 @@ public class GroupController {
         {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        System.out.println(group.toString());
         //Save group details
         Group savedGroup = groupService.saveGroupDetails(group);
-        //Add the creator as a Group Member
-
-        groupService.addGroupMembers(savedGroup);
-
         if(savedGroup == null)
         {
             return new ResponseEntity<>("Error occurred while saving Group Details",HttpStatus.INTERNAL_SERVER_ERROR);
         }
+        //Add the creator as a Group Member
+        GroupMemberDetails groupMemberDetails = groupMapper.getGroupMemberDetailsFromGroup(savedGroup);
+        groupService.addGroupMember(groupMemberDetails);
         return new ResponseEntity<>("Group Details Saved Successfully",HttpStatus.OK);
     }
 
@@ -79,11 +77,10 @@ public class GroupController {
             return new ResponseEntity<>("Group Id cannot be null",HttpStatus.BAD_REQUEST);
         }
         //Get Member Ids
-        List<Long> memberIds = groupService.getGroupMemberIds(groupId);
-        //do null check
+        List<Long> memberIds = groupService.getAllUserIdByGroupId(groupId);
         if(memberIds == null || memberIds.isEmpty())
         {
-            return new ResponseEntity<>("Only you are part of this group",HttpStatus.OK);
+            return new ResponseEntity<>("Group doesn't exist",HttpStatus.OK);
         }
         //Get User Details with Member Ids
         List<User> users = userService.getUsersDetailById(memberIds);
@@ -102,14 +99,24 @@ public class GroupController {
     @GetMapping("/get-groups/{userId}")
     public ResponseEntity<List<String>> getAllTheGroupOfUser(@PathVariable("userId") Long userId)
     {
-        List<Long> groupIds = groupService.getGroupIdsOfUser(userId);
+        List<Long> groupIds = groupService.getAllGroupIdsOfUser(userId);
         if(groupIds == null || groupIds.isEmpty())
         {
-            return new ResponseEntity<>(new ArrayList<>(),HttpStatus.OK);
+            return new ResponseEntity<>(new ArrayList<>(),HttpStatus.NOT_FOUND);
         }
         List<String> groupNames = groupService.getGroupNamesById(groupIds);
+        if(groupNames == null || groupNames.isEmpty())
+        {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        }
         return new ResponseEntity<>(groupNames, HttpStatus.OK);
     }
 
+    @DeleteMapping("/delete-group/{groupId}")
+    public void deleteGroup(@PathVariable("groupId") Long groupId)
+    {
+        groupService.deleteGroupAndMembers(groupId);
+    }
 
 }

@@ -22,12 +22,11 @@ public class GroupService{
     }
 
     public GroupMemberDetails addGroupMember(GroupMemberDetails groupMemberDetails) {
-
         return groupMemberDetailsRepository.save(groupMemberDetails);
     }
 
-    public List<Long> getGroupMemberIds(Long groupId) {
-       return groupMemberDetailsRepository.getUserIdByGroupId(groupId);
+    public List<Long> getAllUserIdByGroupId(Long groupId) {
+       return groupMemberDetailsRepository.getAllUserIdByGroupId(groupId);
     }
 
     public List<String> getGroupNamesById(List<Long> groupIds) {
@@ -40,8 +39,12 @@ public class GroupService{
         return groupNameList;
     }
 
-    public void addGroupMembers(Group savedGroup) {
+    public List<Long> getAllGroupIdsOfUser(Long userId) {
+        return groupMemberDetailsRepository.getAllGroupIdsOfUser(userId);
+    }
 
-
+    public void deleteGroupAndMembers(Long groupId) {
+        groupRepository.deleteById(groupId);
+        groupMemberDetailsRepository.deleteByGroupId(groupId);
     }
 }

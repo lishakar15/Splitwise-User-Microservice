@@ -22,7 +22,7 @@ public class Group {
     @Column(name="grp_name")
     private String groupName;
     @Column(name="created_by")
-    private Integer createdBy;
+    private Long createdBy;
     @Column(name="create_date")
     private Date createdAt;
     @Column(name="last_update_date")
