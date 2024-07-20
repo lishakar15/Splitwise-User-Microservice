@@ -201,7 +201,7 @@
 			"response": []
 		},
 		{
-			"name": "New Request",
+			"name": "Get User Name By Id",
 			"id": "a032c2dd-556b-47d0-8d94-ffe1b3843309",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
