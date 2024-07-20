@@ -209,7 +209,7 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"url": "http://localhost:8080/user/get-user-name/101"
+				"url": "http://localhost:8080/user/get-user-name/2"
 			},
 			"response": []
 		}
