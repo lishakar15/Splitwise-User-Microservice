@@ -199,6 +199,19 @@
 				"url": "http://localhost:8080/group/delete-group/1"
 			},
 			"response": []
+		},
+		{
+			"name": "New Request",
+			"id": "a032c2dd-556b-47d0-8d94-ffe1b3843309",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8080/user/get-user-name/101"
+			},
+			"response": []
 		}
 	]
 }
