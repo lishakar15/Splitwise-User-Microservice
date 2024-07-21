@@ -5,6 +5,7 @@ import com.splitwise.microservices.user_service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -81,6 +82,20 @@ public class UserController {
         User updatedUser = userService.saveUser(user);
         return new ResponseEntity<>(updatedUser,HttpStatus.OK);
 
+    }
+    @GetMapping("/get-user-name/{userId}")
+    public ResponseEntity<String> getUsernameById(@PathVariable("userId") Long userId)
+    {
+        if(userId == null)
+        {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        String userName = userService.getUserNameById(userId);
+        if(!StringUtils.hasLength(userName))
+        {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(userName,HttpStatus.OK);
     }
 
     @GetMapping("/listUsers")

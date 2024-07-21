@@ -17,7 +17,8 @@ public interface UserRepository extends JpaRepository<User,Long> {
     @Query(value = "select u.password from user_details u where u.email_Id = :emailId LIMIT 1",nativeQuery =true)
     public String getUserPasswordByEmailId(@Param("emailId") String emailId);
     //Get user password by phone number
-    @Query(value ="select u.password from user_details u where u.phone =:phoneNumber LIMIT 1", nativeQuery = true)
+    @Query(value ="select cu.password from user_details u where u.phone =:phoneNumber LIMIT 1", nativeQuery = true)
     public String getUserPasswordByPhone(@Param("phoneNumber") String loginParameter);
-
+    @Query(value = "select CONCAT (u.firstName,' ',u.lastName) from User u where userId =:userId")
+    public String getUserNameById(@Param("userId") Long userId);
 }

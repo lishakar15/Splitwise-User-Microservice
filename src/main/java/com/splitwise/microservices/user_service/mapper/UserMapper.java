@@ -14,11 +14,11 @@ public class UserMapper {
         List<UserModel> memberDetailsList = new ArrayList<>();
         for(User user : users)
         {
-            UserModel userModel = new UserModel();
-            userModel.setFirstName(user.getFirstName());
-            userModel.setLastName(user.getLastName());
-            userModel.setEmailId(user.getEmailId());
-            userModel.setPhone(user.getPhoneNumber());
+            UserModel userModel = UserModel.builder().firstName(user.getFirstName())
+                    .lastName(user.getLastName())
+                    .emailId(user.getEmailId())
+                    .phone(user.getPhoneNumber())
+                    .build();
             memberDetailsList.add(userModel);
         }
         return memberDetailsList;

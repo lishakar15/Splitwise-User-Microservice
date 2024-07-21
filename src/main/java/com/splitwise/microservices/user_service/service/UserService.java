@@ -1,6 +1,6 @@
 package com.splitwise.microservices.user_service.service;
 
-import com.splitwise.microservices.user_service.constants.StringConstants;
+import com.splitwise.microservices.user_service.utilities.StringConstants;
 import com.splitwise.microservices.user_service.entity.User;
 import com.splitwise.microservices.user_service.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,4 +50,8 @@ public class UserService{
         return userList;
     }
 
+    public String getUserNameById(Long userId) {
+
+        return userRepository.getUserNameById(userId);
+    }
 }

@@ -1,4 +1,4 @@
-package com.splitwise.microservices.user_service.constants;
+package com.splitwise.microservices.user_service.utilities;
 
 public class StringConstants {
 
