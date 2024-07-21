@@ -1,0 +1,217 @@
+{
+	"info": {
+		"_postman_id": "f31c74a6-b18b-4114-a2b7-6fa4d133b6b9",
+		"name": "Splitwise User and Group",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Login User",
+			"id": "61103a3f-f9c9-4789-8dd7-22bf1ea08e30",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/user/login-user?loginParam=9876543210&password=123456",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"user",
+						"login-user"
+					],
+					"query": [
+						{
+							"key": "loginParam",
+							"value": "9876543210"
+						},
+						{
+							"key": "password",
+							"value": "123456"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register User",
+			"id": "ab177ee8-3fbe-41c2-984f-1a6148351515",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstName\":\"Test\",\r\n    \"lastName\":\"One\",\r\n    \"emailId\": \"test@gmail.com\",\r\n    \"password\":\"123456\",\r\n    \"phoneNumber\": \"9876543210\",\r\n    \"createDate\":\"\",\r\n    \"lastUpdateDate\": \"\"\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/user/register-user"
+			},
+			"response": []
+		},
+		{
+			"name": "Create Group",
+			"id": "8aceb368-a6c8-430f-97ba-675937547cd4",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"groupName\":\"Travel Group\",\r\n    \"createdBy\":\"1\",\r\n    \"createdAt\":null,\r\n    \"lastUpdated\":null\r\n\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/group/create-group"
+			},
+			"response": []
+		},
+		{
+			"name": "Add Member",
+			"id": "83300bb3-c618-485b-9c2d-fdb3db2b77f2",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"groupId\":\"1\",\r\n    \"userId\":\"1\",\r\n    \"joinedAt\":null\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/group/add-members"
+			},
+			"response": []
+		},
+		{
+			"name": "Get User By Id",
+			"id": "d6c0931d-0956-4df5-8778-4dc71ecb2994",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8080/user/get-user/1"
+			},
+			"response": []
+		},
+		{
+			"name": "Update User",
+			"id": "fdf6bfdc-7597-49d0-b762-5c9b1c4ce0a3",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userId\": 1,\r\n    \"firstName\":\"lo\",\r\n    \"lastName\":\"Three\",\r\n    \"emailId\": \"test@gmail.com\",\r\n    \"password\":\"123456\",\r\n    \"phoneNumber\": \"9876543210\",\r\n    \"createDate\":\"\",\r\n    \"lastUpdateDate\": \"\"\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/user/update-user"
+			},
+			"response": []
+		},
+		{
+			"name": "Update Group",
+			"id": "35b5ed8c-9fa4-4d48-823f-d5fd56a3971a",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"groupId\":\"2\",\r\n    \"groupName\":\"Travel Group 2 Updated\",\r\n    \"createdBy\":\"1\",\r\n    \"createdAt\":null,\r\n    \"lastUpdated\":null\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/user/update-group"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Group Members",
+			"id": "ca4c6b0a-fb9f-4d97-ba05-651e6b2ddc8f",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Get User Groups",
+			"id": "2ab83ed1-4af0-4088-a2f4-8b67604df58e",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8080/group/get-groups/1"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Group",
+			"id": "f0d6d6da-76f4-4542-aa6b-8f5b12432653",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": "http://localhost:8080/group/delete-group/1"
+			},
+			"response": []
+		},
+		{
+			"name": "Get User Name By Id",
+			"id": "a032c2dd-556b-47d0-8d94-ffe1b3843309",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8080/user/get-user-name/2"
+			},
+			"response": []
+		}
+	]
+}
