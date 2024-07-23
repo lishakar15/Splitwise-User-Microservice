@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -97,9 +98,13 @@ public class UserController {
         }
         return new ResponseEntity<>(userName,HttpStatus.OK);
     }
-
+    @GetMapping("/get-user-name-map/{groupId}")
+    public Map<Long,String> getUserNameMap(@PathVariable("groupId") Long groupId)
+    {
+        return userService.getUserNameMapByGroupId(groupId);
+    }
     @GetMapping("/listUsers")
-    public void getAllUsers()
+    public void getAllUsersOfA()
     {
         //Return all users
     }

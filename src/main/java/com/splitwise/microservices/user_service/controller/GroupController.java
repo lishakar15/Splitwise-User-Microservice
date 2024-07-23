@@ -9,8 +9,10 @@ import com.splitwise.microservices.user_service.model.UserModel;
 import com.splitwise.microservices.user_service.service.GroupService;
 import com.splitwise.microservices.user_service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,26 +71,26 @@ public class GroupController {
         return new ResponseEntity<>("Group updated successfully",HttpStatus.OK);
     }
     @GetMapping("/get-members/{groupId}")
-    public ResponseEntity<String> getGroupMembers(@PathVariable("groupId") Long groupId)
+    public ResponseEntity<List<UserModel>> getGroupMembers(@PathVariable("groupId") Long groupId)
     {
         if(groupId == null)
         {
-            return new ResponseEntity<>("Group Id cannot be null",HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         //Get Member Ids
         List<Long> memberIds = groupService.getAllUserIdByGroupId(groupId);
         if(memberIds == null || memberIds.isEmpty())
         {
-            return new ResponseEntity<>("Group doesn't exist",HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         //Get User Details with Member Ids
         List<User> users = userService.getUsersDetailById(memberIds);
         if(users == null || users.isEmpty())
         {
-            return new ResponseEntity<>("No Group Members found",HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         List<UserModel> memberDetailsList = userMapper.getUserModel(users);
-        return new ResponseEntity<>(memberDetailsList.toString(),HttpStatus.OK); //Need to convert to json and return
+        return new ResponseEntity<>(memberDetailsList,HttpStatus.OK); //Need to convert to json and return
     }
 
     /**
@@ -110,6 +112,20 @@ public class GroupController {
 
         }
         return new ResponseEntity<>(groupNames, HttpStatus.OK);
+    }
+    @GetMapping("/get-group-name/{groupId}")
+    public ResponseEntity<String> getGroupNameById(@Param("groupId") Long groupId)
+    {
+        if(groupId == null)
+        {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        String groupName = groupService.getGroupNameById(groupId);
+        if(!StringUtils.hasLength(groupName))
+        {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(groupName,HttpStatus.OK);
     }
 
     /**
