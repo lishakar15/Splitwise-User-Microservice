@@ -2,7 +2,10 @@ package com.splitwise.microservices.user_service.controller;
 
 import com.splitwise.microservices.user_service.entity.User;
 import com.splitwise.microservices.user_service.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -16,6 +19,7 @@ import java.util.Optional;
 public class UserController {
     @Autowired
     UserService userService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
     @PostMapping("/register-user")
     public ResponseEntity<String> registerUser(@RequestBody User user)
@@ -99,9 +103,19 @@ public class UserController {
         return new ResponseEntity<>(userName,HttpStatus.OK);
     }
     @GetMapping("/get-user-name-map/{groupId}")
-    public Map<Long,String> getUserNameMap(@PathVariable("groupId") Long groupId)
+    public ResponseEntity<Map<Long,String>>   getUserNameMap(@PathVariable("groupId") Long groupId)
     {
-        return userService.getUserNameMapByGroupId(groupId);
+        LOGGER.info("User Microservice called bro");
+        if(groupId == null)
+        {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        Map<Long, String> userNameMap = userService.getUserNameMapByGroupId(groupId);
+        if(userNameMap == null && userNameMap.isEmpty())
+        {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(userNameMap, HttpStatus.OK);
     }
     @GetMapping("/listUsers")
     public void getAllUsersOfA()

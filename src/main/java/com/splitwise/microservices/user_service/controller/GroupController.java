@@ -114,7 +114,7 @@ public class GroupController {
         return new ResponseEntity<>(groupNames, HttpStatus.OK);
     }
     @GetMapping("/get-group-name/{groupId}")
-    public ResponseEntity<String> getGroupNameById(@Param("groupId") Long groupId)
+    public ResponseEntity<String> getGroupNameById(@PathVariable("groupId") Long groupId)
     {
         if(groupId == null)
         {

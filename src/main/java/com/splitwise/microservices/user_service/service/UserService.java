@@ -70,7 +70,6 @@ public class UserService{
 
     private Map<Long, String> getUserNamesMap(List<Long> userIds) {
         Map<Long, String> userNameMap = new HashMap<>();
-        int a =10;
         if(userIds == null && userIds.isEmpty())
         {
             return userNameMap;
