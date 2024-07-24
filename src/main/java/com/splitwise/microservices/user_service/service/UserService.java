@@ -6,15 +6,16 @@ import com.splitwise.microservices.user_service.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService{
 
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    GroupService groupService;
 
     public User saveUser(User user) {
 
@@ -53,5 +54,32 @@ public class UserService{
     public String getUserNameById(Long userId) {
 
         return userRepository.getUserNameById(userId);
+    }
+
+    public Map<Long, String> getUserNameMapByGroupId(Long groupId) {
+        List<Long> userIds = groupService.getAllUserIdByGroupId(groupId);
+        if(userIds != null && !userIds.isEmpty())
+        {
+            return getUserNamesMap(userIds);
+        }
+        else
+        {
+            return new HashMap<>();
+        }
+    }
+
+    private Map<Long, String> getUserNamesMap(List<Long> userIds) {
+        Map<Long, String> userNameMap = new HashMap<>();
+        if(userIds == null && userIds.isEmpty())
+        {
+            return userNameMap;
+        }
+        else
+        {
+            List<User> userList = getUsersDetailById(userIds);
+            userNameMap = userList.stream().collect(Collectors.toMap(user-> user.getUserId(),
+                    user -> user.getFirstName() + " " + user.getLastName()));
+        }
+        return userNameMap;
     }
 }

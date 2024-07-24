@@ -52,4 +52,8 @@ public class GroupService{
         int rowsAffected = groupMemberDetailsRepository.deleteGroupMember(userId,groupId);
         return rowsAffected > 0 ? true : false;
     }
+
+    public String getGroupNameById(Long groupId) {
+        return  groupRepository.getGroupNameById(groupId);
+    }
 }
