@@ -212,6 +212,18 @@
 				"url": "http://localhost:8080/user/get-user-name/2"
 			},
 			"response": []
+		},
+		{
+			"name": "Get Group Name by Id",
+			"id": "54abea8d-0339-4f0a-ba55-ab2c953da665",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
 		}
 	]
 }
