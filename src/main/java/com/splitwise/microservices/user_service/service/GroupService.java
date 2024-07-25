@@ -1,9 +1,16 @@
 package com.splitwise.microservices.user_service.service;
 
+import com.google.gson.Gson;
+import com.splitwise.microservices.user_service.constants.StringConstants;
 import com.splitwise.microservices.user_service.entity.Group;
 import com.splitwise.microservices.user_service.entity.GroupMemberDetails;
+import com.splitwise.microservices.user_service.enums.ActivityType;
+import com.splitwise.microservices.user_service.external.ActivityRequest;
+import com.splitwise.microservices.user_service.kafka.KafkaProducer;
 import com.splitwise.microservices.user_service.repository.GroupMemberDetailsRepository;
 import com.splitwise.microservices.user_service.repository.GroupRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,19 +23,62 @@ public class GroupService{
     GroupRepository groupRepository;
     @Autowired
     GroupMemberDetailsRepository groupMemberDetailsRepository;
+    @Autowired
+    KafkaProducer kafkaProducer;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GroupService.class);
 
     public Group saveGroupDetails(Group group) {
         return groupRepository.save(group);
     }
 
     public GroupMemberDetails addGroupMember(GroupMemberDetails groupMemberDetails) {
-        return groupMemberDetailsRepository.save(groupMemberDetails);
+        GroupMemberDetails savedGroupMemberDetails = groupMemberDetailsRepository.save(groupMemberDetails);
+        createGroupMemberActivity(ActivityType.USER_ADDED,groupMemberDetails);
+        return savedGroupMemberDetails;
+    }
+
+    private void createGroupMemberActivity(ActivityType activityType, GroupMemberDetails groupMemberDetails) {
+        if(groupMemberDetails != null)
+        {
+            ActivityRequest activityRequest = new ActivityRequest();
+            activityRequest.setActivityType(activityType);
+            activityRequest.setGroupId(groupMemberDetails.getGroupId());
+            activityRequest.setCreateDate(groupMemberDetails.getJoinedAt());
+            StringBuilder sb = new StringBuilder();
+            String groupName = getGroupNameById(groupMemberDetails.getGroupId());
+            if(ActivityType.USER_ADDED.equals(activityType))
+            {
+                sb.append(StringConstants.USER_ID_PREFIX);
+                sb.append(groupMemberDetails.getUserId());
+                sb.append(StringConstants.USER_ID_SUFFIX);
+                sb.append(StringConstants.USER_JOINED_GROUP);
+            }
+            else if(ActivityType.USER_REMOVED.equals(activityType))
+            {
+                sb.append(StringConstants.USER_ID_PREFIX);
+                sb.append(groupMemberDetails.getUserId());
+                sb.append(StringConstants.USER_ID_SUFFIX);
+                sb.append(StringConstants.USER_LEFT_GROUP);;
+            }
+            sb.append(groupName);
+            activityRequest.setMessage(sb.toString());
+            try
+            {
+                Gson gson = new Gson();
+                String activityJson = gson.toJson(activityRequest);
+                kafkaProducer.sendMessage(activityJson);
+            }
+            catch(Exception ex)
+            {
+                LOGGER.error("Error occurred while sending User Message to Kafka Topic ",ex);
+            }
+        }
     }
 
     public List<Long> getAllUserIdByGroupId(Long groupId) {
-       return groupMemberDetailsRepository.getAllUserIdByGroupId(groupId);
+        return groupMemberDetailsRepository.getAllUserIdByGroupId(groupId);
     }
-
     public List<String> getGroupNamesById(List<Long> groupIds) {
         List<String> groupNameList = new ArrayList<>();
         for(Long groupId : groupIds)
@@ -49,7 +99,15 @@ public class GroupService{
     }
 
     public boolean deleteGroupMember(Long userId, Long groupId) {
+
         int rowsAffected = groupMemberDetailsRepository.deleteGroupMember(userId,groupId);
+        if(rowsAffected>0)
+        {
+            GroupMemberDetails groupMemberDetails= new GroupMemberDetails();
+            groupMemberDetails.setUserId(userId);
+            groupMemberDetails.setGroupId(groupId);
+            createGroupMemberActivity(ActivityType.USER_REMOVED,groupMemberDetails);
+        }
         return rowsAffected > 0 ? true : false;
     }
 
