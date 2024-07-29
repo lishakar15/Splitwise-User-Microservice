@@ -1,6 +1,7 @@
 package com.splitwise.microservices.user_service.service;
 
 import com.google.gson.Gson;
+import com.splitwise.microservices.user_service.clients.ActivityClient;
 import com.splitwise.microservices.user_service.constants.StringConstants;
 import com.splitwise.microservices.user_service.entity.Group;
 import com.splitwise.microservices.user_service.entity.GroupMemberDetails;
@@ -25,6 +26,8 @@ public class GroupService{
     GroupMemberDetailsRepository groupMemberDetailsRepository;
     @Autowired
     KafkaProducer kafkaProducer;
+    @Autowired
+    ActivityClient activityClient;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GroupService.class);
 
@@ -35,6 +38,7 @@ public class GroupService{
     public GroupMemberDetails addGroupMember(GroupMemberDetails groupMemberDetails) {
         GroupMemberDetails savedGroupMemberDetails = groupMemberDetailsRepository.save(groupMemberDetails);
         createGroupMemberActivity(ActivityType.USER_ADDED,groupMemberDetails);
+        activityClient.evictUserCache(groupMemberDetails.getGroupId());
         return savedGroupMemberDetails;
     }
 
