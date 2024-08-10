@@ -2,14 +2,13 @@ package com.splitwise.microservices.user_service.controller;
 
 import com.splitwise.microservices.user_service.entity.Group;
 import com.splitwise.microservices.user_service.entity.GroupMemberDetails;
-import com.splitwise.microservices.user_service.entity.User;
+import com.splitwise.microservices.user_service.entity.Users;
 import com.splitwise.microservices.user_service.mapper.GroupMapper;
 import com.splitwise.microservices.user_service.mapper.UserMapper;
 import com.splitwise.microservices.user_service.model.UserModel;
 import com.splitwise.microservices.user_service.service.GroupService;
 import com.splitwise.microservices.user_service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -83,8 +82,8 @@ public class GroupController {
         {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        //Get User Details with Member Ids
-        List<User> users = userService.getUsersDetailById(memberIds);
+        //Get Users Details with Member Ids
+        List<Users> users = userService.getUsersDetailById(memberIds);
         if(users == null || users.isEmpty())
         {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

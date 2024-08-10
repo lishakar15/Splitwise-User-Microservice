@@ -21,7 +21,7 @@ public class KafkaProducer {
         }
         catch(Exception ex)
         {
-            LOGGER.error("Error occurred while sending User message to Kafka ",ex);
+            LOGGER.error("Error occurred while sending Users message to Kafka ",ex);
         }
     }
 }

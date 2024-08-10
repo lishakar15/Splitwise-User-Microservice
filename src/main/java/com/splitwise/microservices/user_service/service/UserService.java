@@ -1,10 +1,11 @@
 package com.splitwise.microservices.user_service.service;
 
-import com.splitwise.microservices.user_service.utilities.StringConstants;
-import com.splitwise.microservices.user_service.entity.User;
+import com.splitwise.microservices.user_service.constants.StringConstants;
+import com.splitwise.microservices.user_service.entity.Users;
 import com.splitwise.microservices.user_service.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,9 +18,9 @@ public class UserService{
     @Autowired
     GroupService groupService;
 
-    public User saveUser(User user) {
+    public Users saveUser(Users users) {
 
-       return userRepository.save(user);
+       return userRepository.save(users);
 
     }
 
@@ -33,22 +34,22 @@ public class UserService{
         return password;
     }
 
-    public Optional<User> getUserById(Long userId) {
+    public Optional<Users> getUserById(Long userId) {
 
         return userRepository.findById(userId);
     }
 
-    public List<User> getUsersDetailById(List<Long> userIds) {
-        List<User> userList = new ArrayList<>();
+    public List<Users> getUsersDetailById(List<Long> userIds) {
+        List<Users> usersList = new ArrayList<>();
         for(Long userId : userIds)
         {
-            Optional<User> optional = userRepository.findById(userId);
+            Optional<Users> optional = userRepository.findById(userId);
             if(optional != null && optional.isPresent())
             {
-                userList.add(optional.get());
+                usersList.add(optional.get());
             }
         }
-        return userList;
+        return usersList;
     }
 
     public String getUserNameById(Long userId) {
@@ -67,6 +68,15 @@ public class UserService{
             return new HashMap<>();
         }
     }
+    public Users getUserDetailsByEmailId(String emailId)
+    {
+        Users users = null;
+        if(StringUtils.hasLength(emailId))
+        {
+            users = userRepository.findByEmailId(emailId);
+        }
+        return users;
+    }
 
     private Map<Long, String> getUserNamesMap(List<Long> userIds) {
         Map<Long, String> userNameMap = new HashMap<>();
@@ -76,8 +86,8 @@ public class UserService{
         }
         else
         {
-            List<User> userList = getUsersDetailById(userIds);
-            userNameMap = userList.stream().collect(Collectors.toMap(user-> user.getUserId(),
+            List<Users> usersList = getUsersDetailById(userIds);
+            userNameMap = usersList.stream().collect(Collectors.toMap(user-> user.getUserId(),
                     user -> user.getFirstName() + " " + user.getLastName()));
         }
         return userNameMap;
