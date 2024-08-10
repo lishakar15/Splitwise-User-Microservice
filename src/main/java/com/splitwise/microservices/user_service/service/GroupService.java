@@ -75,7 +75,7 @@ public class GroupService{
             }
             catch(Exception ex)
             {
-                LOGGER.error("Error occurred while sending Users Message to Kafka Topic ",ex);
+                LOGGER.error("Error occurred while sending User Message to Kafka Topic ",ex);
             }
         }
     }

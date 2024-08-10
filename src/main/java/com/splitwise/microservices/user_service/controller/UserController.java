@@ -1,6 +1,6 @@
 package com.splitwise.microservices.user_service.controller;
 
-import com.splitwise.microservices.user_service.entity.Users;
+import com.splitwise.microservices.user_service.entity.User;
 import com.splitwise.microservices.user_service.jwt.JwtUtils;
 import com.splitwise.microservices.user_service.model.LoginResponse;
 import com.splitwise.microservices.user_service.model.UserCredentials;
@@ -37,25 +37,25 @@ public class UserController {
     BCryptPasswordEncoder encoder;
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
-    @PostMapping("/register-users")
-    public ResponseEntity<String> registerUser(@RequestBody Users users)
+    @PostMapping("/register-user")
+    public ResponseEntity<String> registerUser(@RequestBody User user)
     {
         //Todo Check if email or phone number already exists if yes then redirect to login
-        if(users == null)
+        if(user == null)
         {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        String encryptedPassword = encoder.encode(users.getPassword());
-        users.setPassword(encryptedPassword);
-        Users savedUsers = userService.saveUser(users);
-        if(null != savedUsers)
+        String encryptedPassword = encoder.encode(user.getPassword());
+        user.setPassword(encryptedPassword);
+        User savedUser = userService.saveUser(user);
+        if(null != savedUser)
         {
-           return new ResponseEntity<>("Users Saved successfully",HttpStatus.OK);
+           return new ResponseEntity<>("User Saved successfully",HttpStatus.OK);
         }
         else
         {
-            return new ResponseEntity<>("Error occurred while saving users details",HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("Error occurred while saving user details",HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     @PostMapping("/login-user")
@@ -100,13 +100,13 @@ public class UserController {
     }
 
     @GetMapping("/get-user/{userId}")
-    public ResponseEntity<Users> getUserDetails(@PathVariable("userId")Long userId)
+    public ResponseEntity<User> getUserDetails(@PathVariable("userId")Long userId)
     {
         if(userId == null)
         {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        Optional<Users> optional = userService.getUserById(userId);
+        Optional<User> optional = userService.getUserById(userId);
         if(!optional.isPresent())
         {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -117,16 +117,16 @@ public class UserController {
         }
     }
 
-    @PutMapping("/update-users")
-    public ResponseEntity<Users> updateUserDetails(@RequestBody Users users)
+    @PutMapping("/update-user")
+    public ResponseEntity<User> updateUserDetails(@RequestBody User user)
     {
         //Todo Need to check if the id already exists and then update
-        if(users == null || users.getUserId() == null)
+        if(user == null || user.getUserId() == null)
         {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        Users updatedUsers = userService.saveUser(users);
-        return new ResponseEntity<>(updatedUsers,HttpStatus.OK);
+        User updatedUser = userService.saveUser(user);
+        return new ResponseEntity<>(updatedUser,HttpStatus.OK);
 
     }
     @GetMapping("/get-user-name/{userId}")
@@ -146,7 +146,7 @@ public class UserController {
     @GetMapping("/get-user-name-map/{groupId}")
     public ResponseEntity<Map<Long,String>>   getUserNameMap(@PathVariable("groupId") Long groupId)
     {
-        LOGGER.info("Users Microservice called bro");
+        LOGGER.info("User Microservice called bro");
         if(groupId == null)
         {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
