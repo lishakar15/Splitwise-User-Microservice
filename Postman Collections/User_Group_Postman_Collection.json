@@ -34,6 +34,9 @@
 				"disableBodyPruning": true
 			},
 			"request": {
+				"auth": {
+					"type": "noauth"
+				},
 				"method": "POST",
 				"header": [],
 				"body": {
@@ -45,7 +48,7 @@
 						}
 					}
 				},
-				"url": "http://localhost:8085/user/register-user"
+				"url": "http://localhost:8080/user/register-user"
 			},
 			"response": []
 		},
