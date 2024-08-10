@@ -14,28 +14,16 @@
 			"request": {
 				"method": "POST",
 				"header": [],
-				"url": {
-					"raw": "http://localhost:8080/user/login-user?loginParam=9876543210&password=123456",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"user",
-						"login-user"
-					],
-					"query": [
-						{
-							"key": "loginParam",
-							"value": "9876543210"
-						},
-						{
-							"key": "password",
-							"value": "123456"
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userName\" : \"test@gmail.com\",\r\n    \"password\" : \"123456\",\r\n    \"role\" : \"ADMIN\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
 						}
-					]
-				}
+					}
+				},
+				"url": "http://localhost:8080/user/login-user"
 			},
 			"response": []
 		},
