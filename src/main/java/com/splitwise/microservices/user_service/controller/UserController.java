@@ -1,16 +1,26 @@
 package com.splitwise.microservices.user_service.controller;
 
 import com.splitwise.microservices.user_service.entity.User;
+import com.splitwise.microservices.user_service.jwt.JwtUtils;
+import com.splitwise.microservices.user_service.model.LoginResponse;
+import com.splitwise.microservices.user_service.model.UserCredentials;
 import com.splitwise.microservices.user_service.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -19,6 +29,12 @@ import java.util.Optional;
 public class UserController {
     @Autowired
     UserService userService;
+    @Autowired
+    private JwtUtils jwtUtils;
+    @Autowired
+    AuthenticationManager authenticationManager;
+    @Autowired
+    BCryptPasswordEncoder encoder;
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
     @PostMapping("/register-user")
@@ -29,7 +45,9 @@ public class UserController {
         {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        //Todo Need to encrypt the password and save it
+
+        String encryptedPassword = encoder.encode(user.getPassword());
+        user.setPassword(encryptedPassword);
         User savedUser = userService.saveUser(user);
         if(null != savedUser)
         {
@@ -41,21 +59,44 @@ public class UserController {
         }
     }
     @PostMapping("/login-user")
-    public ResponseEntity<String> loginUser(@RequestParam("loginParam") String loginParameter,
-                                            @RequestParam("password") String password)
+    public ResponseEntity<?> loginUser(@RequestBody UserCredentials userCredentials)
     {
-        //Write code for Authentication
-    
-        //Need to write code to decrypt password
-        String userPassword = userService.getUserPassword(loginParameter);
-        if(userPassword != null && userPassword.equals(password))
+        Authentication authentication;
+        LoginResponse loginResponse;
+        if(userCredentials == null)
         {
-            return new ResponseEntity<>("Login Successful", HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        else
+        //Authentication the user credentials
+        try
         {
-            return new ResponseEntity<>("Login Request failed! Invalid email or password",HttpStatus.BAD_REQUEST);
+            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userCredentials.getUserName(),
+                            userCredentials.getPassword()));
+            if(authentication.isAuthenticated())
+            {
+                //Authentication Successfully Completed Let's generate the JWT Token
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal(); //Principal -> Authenticated User
+                String jwtToken = jwtUtils.generateTokenFromUsername(userDetails);
+                loginResponse = LoginResponse.builder()
+                        .jwtToken(jwtToken)
+                        .userName(userDetails.getUsername())
+                        .build();
+                //Authentication Completed, Set the Authentication object into the Spring Context for future requests
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+            else
+            {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
         }
+        catch(AuthenticationException ex)
+        {
+            Map<String,Object> map = new HashMap<>();
+            map.put("message","Bad Credentials");
+            map.put("status",false);
+            return new ResponseEntity<>(map, HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(loginResponse,HttpStatus.OK);
     }
 
     @GetMapping("/get-user/{userId}")

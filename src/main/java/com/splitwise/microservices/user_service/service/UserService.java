@@ -1,10 +1,11 @@
 package com.splitwise.microservices.user_service.service;
 
-import com.splitwise.microservices.user_service.utilities.StringConstants;
+import com.splitwise.microservices.user_service.constants.StringConstants;
 import com.splitwise.microservices.user_service.entity.User;
 import com.splitwise.microservices.user_service.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -66,6 +67,15 @@ public class UserService{
         {
             return new HashMap<>();
         }
+    }
+    public User getUserDetailsByEmailId(String emailId)
+    {
+        User user = null;
+        if(StringUtils.hasLength(emailId))
+        {
+            user = userRepository.findByEmailId(emailId);
+        }
+        return user;
     }
 
     private Map<Long, String> getUserNamesMap(List<Long> userIds) {

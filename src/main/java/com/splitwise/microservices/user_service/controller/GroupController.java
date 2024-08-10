@@ -9,7 +9,6 @@ import com.splitwise.microservices.user_service.model.UserModel;
 import com.splitwise.microservices.user_service.service.GroupService;
 import com.splitwise.microservices.user_service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;

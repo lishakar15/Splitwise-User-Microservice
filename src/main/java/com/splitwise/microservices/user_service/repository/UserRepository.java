@@ -6,8 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
 public interface UserRepository extends JpaRepository<User,Long> {
 
@@ -21,4 +19,6 @@ public interface UserRepository extends JpaRepository<User,Long> {
     public String getUserPasswordByPhone(@Param("phoneNumber") String loginParameter);
     @Query(value = "select CONCAT (u.firstName,' ',u.lastName) from User u where userId =:userId")
     public String getUserNameById(@Param("userId") Long userId);
+
+    public User findByEmailId(String emailId);
 }
