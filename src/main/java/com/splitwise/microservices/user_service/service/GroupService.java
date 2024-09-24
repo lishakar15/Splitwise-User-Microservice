@@ -8,15 +8,19 @@ import com.splitwise.microservices.user_service.entity.GroupMemberDetails;
 import com.splitwise.microservices.user_service.enums.ActivityType;
 import com.splitwise.microservices.user_service.external.ActivityRequest;
 import com.splitwise.microservices.user_service.kafka.KafkaProducer;
+import com.splitwise.microservices.user_service.model.GroupDataResponse;
+import com.splitwise.microservices.user_service.model.GroupMember;
 import com.splitwise.microservices.user_service.repository.GroupMemberDetailsRepository;
 import com.splitwise.microservices.user_service.repository.GroupRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class GroupService{
@@ -24,6 +28,9 @@ public class GroupService{
     GroupRepository groupRepository;
     @Autowired
     GroupMemberDetailsRepository groupMemberDetailsRepository;
+    @Autowired
+    @Lazy
+    UserService userService;
     @Autowired
     KafkaProducer kafkaProducer;
     @Autowired
@@ -38,7 +45,7 @@ public class GroupService{
     public GroupMemberDetails addGroupMember(GroupMemberDetails groupMemberDetails) {
         GroupMemberDetails savedGroupMemberDetails = groupMemberDetailsRepository.save(groupMemberDetails);
         createGroupMemberActivity(ActivityType.USER_ADDED,groupMemberDetails);
-        activityClient.evictUserCache(groupMemberDetails.getGroupId());
+        //activityClient.evictUserCache(groupMemberDetails.getGroupId());
         return savedGroupMemberDetails;
     }
 
@@ -91,6 +98,35 @@ public class GroupService{
             groupNameList.add(groupName);
         }
         return groupNameList;
+    }
+    public List<GroupDataResponse> getUserGroupDataList(List<Long> groupIds)
+    {
+        if(groupIds == null )
+        {
+            return null;
+        }
+        List<GroupDataResponse> groupDataResponseList = new ArrayList<>();
+        for(Long groupId : groupIds)
+        {
+            List<GroupMember> groupMembers = new ArrayList<>();
+            GroupDataResponse groupDataResponse = new GroupDataResponse();
+            Map<Long, String> groupMembersMap = userService.getUserNameMapByGroupId(groupId);
+            String groupName = groupRepository.getGroupNameById(groupId);
+            for(Map.Entry<Long,String> memberMapEntry : groupMembersMap.entrySet())
+            {
+                GroupMember groupMember = GroupMember.builder()
+                        .userId(memberMapEntry.getKey())
+                        .userName(memberMapEntry.getValue())
+                        .build();
+                groupMembers.add(groupMember);
+            }
+            groupDataResponse.setGroupName(groupName);
+            groupDataResponse.setGroupId(groupId);
+            groupDataResponse.setGroupMembers(groupMembers);
+
+            groupDataResponseList.add(groupDataResponse);
+        }
+        return groupDataResponseList;
     }
 
     public List<Long> getAllGroupIdsOfUser(Long userId) {

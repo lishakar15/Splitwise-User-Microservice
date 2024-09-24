@@ -26,6 +26,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/user")
+@CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
     @Autowired
     UserService userService;
@@ -144,9 +145,8 @@ public class UserController {
         return new ResponseEntity<>(userName,HttpStatus.OK);
     }
     @GetMapping("/get-user-name-map/{groupId}")
-    public ResponseEntity<Map<Long,String>>   getUserNameMap(@PathVariable("groupId") Long groupId)
+    public ResponseEntity<Map<Long,String>> getUserNameMap(@PathVariable("groupId") Long groupId)
     {
-        LOGGER.info("User Microservice called bro");
         if(groupId == null)
         {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

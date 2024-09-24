@@ -5,6 +5,7 @@ import com.splitwise.microservices.user_service.entity.GroupMemberDetails;
 import com.splitwise.microservices.user_service.entity.User;
 import com.splitwise.microservices.user_service.mapper.GroupMapper;
 import com.splitwise.microservices.user_service.mapper.UserMapper;
+import com.splitwise.microservices.user_service.model.GroupDataResponse;
 import com.splitwise.microservices.user_service.model.UserModel;
 import com.splitwise.microservices.user_service.service.GroupService;
 import com.splitwise.microservices.user_service.service.UserService;
@@ -18,6 +19,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/group")
+@CrossOrigin(origins = "http://localhost:3000")
 public class GroupController {
 
     @Autowired
@@ -56,7 +58,7 @@ public class GroupController {
             return new ResponseEntity<>("Invalid input to add members",HttpStatus.NOT_FOUND);
         }
         GroupMemberDetails groupMemberDetails1 = groupService.addGroupMember(groupMemberDetails);
-        return new ResponseEntity<>("Member added successfully to the group",HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("Member added successfully to the group",HttpStatus.OK);
 
     }
     @PutMapping("/update-group")
@@ -93,24 +95,19 @@ public class GroupController {
     }
 
     /**
-     * This method return list group name a user participating
+     * This method return list groups a user participating
      * @param userId
      */
     @GetMapping("/get-groups/{userId}")
-    public ResponseEntity<List<String>> getAllTheGroupOfUser(@PathVariable("userId") Long userId)
+    public ResponseEntity<List<GroupDataResponse>> getAllTheGroupOfUser(@PathVariable("userId") Long userId)
     {
         List<Long> groupIds = groupService.getAllGroupIdsOfUser(userId);
         if(groupIds == null || groupIds.isEmpty())
         {
             return new ResponseEntity<>(new ArrayList<>(),HttpStatus.NOT_FOUND);
         }
-        List<String> groupNames = groupService.getGroupNamesById(groupIds);
-        if(groupNames == null || groupNames.isEmpty())
-        {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-        }
-        return new ResponseEntity<>(groupNames, HttpStatus.OK);
+        List<GroupDataResponse> groupDataResponse = groupService.getUserGroupDataList(groupIds);
+        return new ResponseEntity<>(groupDataResponse, HttpStatus.OK);
     }
     @GetMapping("/get-group-name/{groupId}")
     public ResponseEntity<String> getGroupNameById(@PathVariable("groupId") Long groupId)

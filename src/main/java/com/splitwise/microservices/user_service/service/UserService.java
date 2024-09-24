@@ -88,7 +88,7 @@ public class UserService{
         {
             List<User> userList = getUsersDetailById(userIds);
             userNameMap = userList.stream().collect(Collectors.toMap(user-> user.getUserId(),
-                    user -> user.getFirstName() + " " + user.getLastName()));
+                    user -> user.getFirstName()));
         }
         return userNameMap;
     }
