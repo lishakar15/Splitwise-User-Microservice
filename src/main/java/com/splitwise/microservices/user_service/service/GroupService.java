@@ -44,7 +44,7 @@ public class GroupService{
 
     public GroupMemberDetails addGroupMember(GroupMemberDetails groupMemberDetails) {
         GroupMemberDetails savedGroupMemberDetails = groupMemberDetailsRepository.save(groupMemberDetails);
-        createGroupMemberActivity(ActivityType.USER_ADDED,groupMemberDetails);
+        //createGroupMemberActivity(ActivityType.USER_ADDED,groupMemberDetails);
         //activityClient.evictUserCache(groupMemberDetails.getGroupId());
         return savedGroupMemberDetails;
     }
@@ -153,5 +153,24 @@ public class GroupService{
 
     public String getGroupNameById(Long groupId) {
         return  groupRepository.getGroupNameById(groupId);
+    }
+
+    public GroupDataResponse getUserDataByGroupId(Long groupId){
+        List<GroupMember> groupMembers = new ArrayList<>();
+        GroupDataResponse groupDataResponse = new GroupDataResponse();
+        Map<Long, String> groupMembersMap = userService.getUserNameMapByGroupId(groupId);
+        String groupName = groupRepository.getGroupNameById(groupId);
+        for(Map.Entry<Long,String> memberMapEntry : groupMembersMap.entrySet())
+        {
+            GroupMember groupMember = GroupMember.builder()
+                    .userId(memberMapEntry.getKey())
+                    .userName(memberMapEntry.getValue())
+                    .build();
+            groupMembers.add(groupMember);
+        }
+        groupDataResponse.setGroupName(groupName);
+        groupDataResponse.setGroupId(groupId);
+        groupDataResponse.setGroupMembers(groupMembers);
+        return groupDataResponse;
     }
 }

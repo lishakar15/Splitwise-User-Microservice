@@ -98,7 +98,7 @@ public class GroupController {
      * This method return list groups a user participating
      * @param userId
      */
-    @GetMapping("/get-groups/{userId}")
+    @GetMapping("/get-all-groups/{userId}")
     public ResponseEntity<List<GroupDataResponse>> getAllTheGroupOfUser(@PathVariable("userId") Long userId)
     {
         List<Long> groupIds = groupService.getAllGroupIdsOfUser(userId);
@@ -109,6 +109,18 @@ public class GroupController {
         List<GroupDataResponse> groupDataResponse = groupService.getUserGroupDataList(groupIds);
         return new ResponseEntity<>(groupDataResponse, HttpStatus.OK);
     }
+
+    @GetMapping("/get-group/{groupId}")
+    public ResponseEntity<GroupDataResponse> getGroupDataByUserId(@PathVariable("groupId") Long groupId)
+    {
+        if(groupId == null)
+        {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        GroupDataResponse groupDataResponse = groupService.getUserDataByGroupId(groupId);
+        return new ResponseEntity<>(groupDataResponse,HttpStatus.OK);
+    }
+
     @GetMapping("/get-group-name/{groupId}")
     public ResponseEntity<String> getGroupNameById(@PathVariable("groupId") Long groupId)
     {
