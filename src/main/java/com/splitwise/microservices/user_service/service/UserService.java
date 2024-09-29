@@ -57,6 +57,16 @@ public class UserService{
         return userRepository.getUserNameById(userId);
     }
 
+    public Map<Long, String> getUserNameMapByUserIds(List<Long> userIds) {
+        Map<Long,String> userNameMap = new HashMap<>();
+        for(Long userId: userIds)
+        {
+            String userName = getUserNameById(userId);
+            userNameMap.putIfAbsent(userId,userName);
+        }
+        return userNameMap;
+    }
+
     public Map<Long, String> getUserNameMapByGroupId(Long groupId) {
         List<Long> userIds = groupService.getAllUserIdByGroupId(groupId);
         if(userIds != null && !userIds.isEmpty())

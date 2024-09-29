@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -172,5 +173,16 @@ public class GroupService{
         groupDataResponse.setGroupId(groupId);
         groupDataResponse.setGroupMembers(groupMembers);
         return groupDataResponse;
+    }
+
+    public Map<Long, String> getGroupNameMapByUserId(Long userId) {
+        Map<Long,String> groupNameMap = new HashMap<>();
+        List<Long> groupIds = getAllGroupIdsOfUser(userId);
+        for(Long groupId : groupIds)
+        {
+            String groupName = groupRepository.getGroupNameById(groupId);
+            groupNameMap.put(groupId,groupName);
+        }
+        return groupNameMap;
     }
 }

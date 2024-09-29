@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/group")
@@ -107,6 +108,21 @@ public class GroupController {
         }
         List<GroupDataResponse> groupDataResponse = groupService.getUserGroupDataList(groupIds);
         return new ResponseEntity<>(groupDataResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("get-all-group-map/{userId}")
+    public ResponseEntity<Map<Long,String>> getAllGroupNameMapByUserId(@PathVariable("userId") Long userId)
+    {
+        if(userId ==null)
+        {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        Map<Long,String> groupNameMap = groupService.getGroupNameMapByUserId(userId);
+        if(groupNameMap == null)
+        {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(groupNameMap,HttpStatus.OK);
     }
 
     @GetMapping("/get-group/{groupId}")
