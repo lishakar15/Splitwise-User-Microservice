@@ -151,7 +151,7 @@ public class UserController {
         {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        Map<Long, String> userNameMap = userService.getUserNamesMap(userIds);
+        Map<Long, String> userNameMap = userService.getUserNameMapByUserIds(userIds);
         if(userNameMap == null && userNameMap.isEmpty())
         {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

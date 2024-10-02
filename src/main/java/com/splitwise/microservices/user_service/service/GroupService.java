@@ -92,7 +92,15 @@ public class GroupService{
     public List<Long> getAllUserIdByGroupId(Long groupId) {
         return groupMemberDetailsRepository.getAllUserIdByGroupId(groupId);
     }
-
+    public List<String> getGroupNamesById(List<Long> groupIds) {
+        List<String> groupNameList = new ArrayList<>();
+        for(Long groupId : groupIds)
+        {
+            String groupName = groupRepository.getGroupNameById(groupId);
+            groupNameList.add(groupName);
+        }
+        return groupNameList;
+    }
     public List<GroupDataResponse> getUserGroupDataList(List<Long> groupIds)
     {
         if(groupIds == null )
