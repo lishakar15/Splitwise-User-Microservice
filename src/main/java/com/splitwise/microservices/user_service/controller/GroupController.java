@@ -15,7 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/group")
@@ -109,6 +111,21 @@ public class GroupController {
         return new ResponseEntity<>(groupDataResponse, HttpStatus.OK);
     }
 
+    @GetMapping("get-all-group-map/{userId}")
+    public ResponseEntity<Map<Long,String>> getAllGroupNameMapByUserId(@PathVariable("userId") Long userId)
+    {
+        if(userId ==null)
+        {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        Map<Long,String> groupNameMap = groupService.getGroupNameMapByUserId(userId);
+        if(groupNameMap == null)
+        {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(groupNameMap,HttpStatus.OK);
+    }
+
     @GetMapping("/get-group/{groupId}")
     public ResponseEntity<GroupDataResponse> getGroupDataByUserId(@PathVariable("groupId") Long groupId)
     {
@@ -133,6 +150,25 @@ public class GroupController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(groupName,HttpStatus.OK);
+    }
+
+    @GetMapping("/get-group-name-map/{groupId}")
+    public ResponseEntity<Map<Long,String>> getGroupNameMapByGroupId(@PathVariable("groupId") Long groupId){
+        if(groupId == null)
+        {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        Map<Long, String> groupNameMap = new HashMap<>();
+        String groupName = groupService.getGroupNameById(groupId);
+        if(groupName != null && groupName.length()>0)
+        {
+            groupNameMap.put(groupId, groupName);
+        }
+        if(!StringUtils.hasLength(groupName))
+        {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(groupNameMap,HttpStatus.OK);
     }
 
     /**

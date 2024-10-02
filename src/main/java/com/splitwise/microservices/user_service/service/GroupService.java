@@ -19,8 +19,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class GroupService{
@@ -90,15 +92,7 @@ public class GroupService{
     public List<Long> getAllUserIdByGroupId(Long groupId) {
         return groupMemberDetailsRepository.getAllUserIdByGroupId(groupId);
     }
-    public List<String> getGroupNamesById(List<Long> groupIds) {
-        List<String> groupNameList = new ArrayList<>();
-        for(Long groupId : groupIds)
-        {
-            String groupName = groupRepository.getGroupNameById(groupId);
-            groupNameList.add(groupName);
-        }
-        return groupNameList;
-    }
+
     public List<GroupDataResponse> getUserGroupDataList(List<Long> groupIds)
     {
         if(groupIds == null )
@@ -172,5 +166,18 @@ public class GroupService{
         groupDataResponse.setGroupId(groupId);
         groupDataResponse.setGroupMembers(groupMembers);
         return groupDataResponse;
+    }
+
+    public Map<Long, String> getGroupNameMapByUserId(Long userId) {
+        Map<Long,String> groupNameMap = new HashMap<>();
+        List<Long> groupIds = getAllGroupIdsOfUser(userId);
+        List<Group> groupList = groupRepository.findByGroupIdIn(groupIds);
+        groupNameMap = groupList.stream().collect(Collectors.toMap(g -> g.getGroupId(), g-> g.getGroupName()));
+        return groupNameMap;
+    }
+    public List<Long> getGroupMembersUserIdByGroupIds(List<Long> groupIds)
+    {
+        List<Long> membersUserId = groupMemberDetailsRepository.getUserIdsByGroupIdIn(groupIds);
+        return membersUserId;
     }
 }

@@ -12,4 +12,6 @@ public interface GroupRepository extends JpaRepository<Group,Long> {
 
     @Query("select g.groupName from Group g where g.groupId =:groupId ")
     public String getGroupNameById(Long groupId);
+
+    List<Group> findByGroupIdIn(List<Long> groupIds);
 }

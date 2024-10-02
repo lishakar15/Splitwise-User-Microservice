@@ -21,6 +21,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -143,6 +144,21 @@ public class UserController {
         }
         return new ResponseEntity<>(userName,HttpStatus.OK);
     }
+    @PostMapping("/get-user-name-map/")
+    public ResponseEntity<Map<Long,String>> getUserNameMapByUserIds(@RequestBody List<Long> userIds){
+
+        if(userIds == null)
+        {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        Map<Long, String> userNameMap = userService.getUserNamesMap(userIds);
+        if(userNameMap == null && userNameMap.isEmpty())
+        {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(userNameMap, HttpStatus.OK);
+    }
+
     @GetMapping("/get-user-name-map/{groupId}")
     public ResponseEntity<Map<Long,String>> getUserNameMap(@PathVariable("groupId") Long groupId)
     {
@@ -157,10 +173,21 @@ public class UserController {
         }
         return new ResponseEntity<>(userNameMap, HttpStatus.OK);
     }
-    @GetMapping("/listUsers")
-    public void getAllUsersOfA()
-    {
-        //Return all users
+
+    @GetMapping("/get-friends-name-map/{userId}")
+    public ResponseEntity<Map<Long,String>> getAllFriendsUserNameMap(@PathVariable("userId") Long userId) {
+        if(userId == null)
+        {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        Map<Long, String> userNameMap = userService.getAllFriendsUserNameMapByUserId(userId);
+        if(userNameMap == null || userNameMap.isEmpty())
+        {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(userNameMap, HttpStatus.OK);
     }
 
 }

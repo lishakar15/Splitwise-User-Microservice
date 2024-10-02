@@ -40,16 +40,8 @@ public class UserService{
     }
 
     public List<User> getUsersDetailById(List<Long> userIds) {
-        List<User> userList = new ArrayList<>();
-        for(Long userId : userIds)
-        {
-            Optional<User> optional = userRepository.findById(userId);
-            if(optional != null && optional.isPresent())
-            {
-                userList.add(optional.get());
-            }
-        }
-        return userList;
+
+        return userRepository.findByUserIdIn(userIds);
     }
 
     public String getUserNameById(Long userId) {
@@ -78,7 +70,7 @@ public class UserService{
         return user;
     }
 
-    private Map<Long, String> getUserNamesMap(List<Long> userIds) {
+    public Map<Long, String> getUserNamesMap(List<Long> userIds) {
         Map<Long, String> userNameMap = new HashMap<>();
         if(userIds == null && userIds.isEmpty())
         {
@@ -90,6 +82,22 @@ public class UserService{
             userNameMap = userList.stream().collect(Collectors.toMap(user-> user.getUserId(),
                     user -> user.getFirstName()));
         }
+        return userNameMap;
+    }
+
+    public Map<Long, String> getAllFriendsUserNameMapByUserId(Long userId){
+        Map<Long, String> userNameMap = new HashMap<>();
+        if(userId == null)
+        {
+            throw new RuntimeException("UserId cannot be null");
+        }
+        //Get the List of groups user belongs to
+        List<Long> groupIds = groupService.getAllGroupIdsOfUser(userId);
+        //Get userIds of the group members by group ids\
+        List<Long> membersUserIds = groupService.getGroupMembersUserIdByGroupIds(groupIds);
+        //Get userNameMap by userIds
+        List<User> usersList = userRepository.findByUserIdIn(membersUserIds);
+        userNameMap = getUserNamesMap(membersUserIds);
         return userNameMap;
     }
 }
