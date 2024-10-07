@@ -4,6 +4,7 @@ import com.splitwise.microservices.user_service.entity.User;
 import com.splitwise.microservices.user_service.jwt.JwtUtils;
 import com.splitwise.microservices.user_service.model.LoginResponse;
 import com.splitwise.microservices.user_service.model.UserCredentials;
+import com.splitwise.microservices.user_service.configuration.CustomUserDetailService;
 import com.splitwise.microservices.user_service.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,9 +79,11 @@ public class UserController {
                 //Authentication Successfully Completed Let's generate the JWT Token
                 UserDetails userDetails = (UserDetails) authentication.getPrincipal(); //Principal -> Authenticated User
                 String jwtToken = jwtUtils.generateTokenFromUsername(userDetails);
+                Long userId = ((CustomUserDetailService) userDetails).getUserId();
                 loginResponse = LoginResponse.builder()
                         .jwtToken(jwtToken)
                         .userName(userDetails.getUsername())
+                        .userId(userId)
                         .build();
                 //Authentication Completed, Set the Authentication object into the Spring Context for future requests
                 SecurityContextHolder.getContext().setAuthentication(authentication);

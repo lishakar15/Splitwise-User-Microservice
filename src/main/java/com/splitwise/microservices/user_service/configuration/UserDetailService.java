@@ -15,13 +15,13 @@ public class UserDetailService implements UserDetailsService {
     UserService userService;
     @Override
     public UserDetails loadUserByUsername(String emailId) throws UsernameNotFoundException {
-        UserDetails usersDetails;
+        CustomUserDetailService usersDetails;
         if(StringUtils.hasLength(emailId))
         {
             //Get the user object for the given name
             User user = userService.getUserDetailsByEmailId(emailId);
             if (user != null) {
-                usersDetails = org.springframework.security.core.userdetails.User.withUsername(user.getEmailId())
+                usersDetails = (CustomUserDetailService) org.springframework.security.core.userdetails.User.withUsername(user.getEmailId())
                         .password(user.getPassword())
                         .build();
             } else {

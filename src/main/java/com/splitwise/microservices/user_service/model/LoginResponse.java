@@ -12,6 +12,7 @@ import java.util.List;
 @Builder
 public class LoginResponse {
     private String jwtToken;
+    private Long userId;
     private String userName;
     //private List<String> roles;
 }
