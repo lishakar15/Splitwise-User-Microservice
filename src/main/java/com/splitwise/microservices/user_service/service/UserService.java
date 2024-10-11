@@ -82,20 +82,24 @@ public class UserService{
 
     public Map<Long, String> getUserNamesMap(List<Long> userIds) {
         Map<Long, String> userNameMap = new HashMap<>();
-        if(userIds == null && userIds.isEmpty())
-        {
-            return userNameMap;
-        }
-        else
-        {
+        if (userIds != null && !userIds.isEmpty()) {
             List<User> userList = getUsersDetailById(userIds);
-            userNameMap = userList.stream().collect(Collectors.toMap(user-> user.getUserId(),
+            userNameMap = userList.stream().collect(Collectors.toMap(user -> user.getUserId(),
                     user -> user.getFirstName()));
         }
         return userNameMap;
     }
 
-    public Map<Long, String> getAllFriendsUserNameMapByUserId(Long userId){
+    public Map<Long, String> getUserEmailMap(List<Long> userIds) {
+        Map<Long, String> userEmailMap = new HashMap<>();
+        if (userIds != null && !userIds.isEmpty()) {
+            List<User> userList = getUsersDetailById(userIds);
+            userEmailMap = userList.stream().collect(Collectors.toMap(user->user.getUserId(),user -> user.getEmailId()));
+        }
+        return userEmailMap;
+    }
+
+    public Map<Long, String> getAllFriendsUserNameMapByUserId(Long userId) {
         Map<Long, String> userNameMap = new HashMap<>();
         if(userId == null)
         {

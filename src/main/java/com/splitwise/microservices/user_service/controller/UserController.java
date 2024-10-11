@@ -161,6 +161,19 @@ public class UserController {
         }
         return new ResponseEntity<>(userNameMap, HttpStatus.OK);
     }
+    @PostMapping("/get-user-email-map")
+    public ResponseEntity<Map<Long,String>> getUserEmailMap(@RequestBody List<Long> userIds){
+        if(userIds == null)
+        {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        Map<Long,String> userEmailMap = userService.getUserEmailMap(userIds);
+        if(userEmailMap == null && userEmailMap.isEmpty())
+        {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(userEmailMap, HttpStatus.OK);
+    }
 
     @GetMapping("/get-user-name-map/{groupId}")
     public ResponseEntity<Map<Long,String>> getUserNameMap(@PathVariable("groupId") Long groupId)
