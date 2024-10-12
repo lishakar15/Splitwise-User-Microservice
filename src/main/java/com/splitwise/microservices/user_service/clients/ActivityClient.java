@@ -6,6 +6,5 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @FeignClient(name ="Activity-Service", url = "http://localhost:8082/")
 public interface ActivityClient {
-    @PostMapping("/activity/evictCache/{groupId}")
-    public void evictUserCache(@PathVariable Long groupId);
+
 }

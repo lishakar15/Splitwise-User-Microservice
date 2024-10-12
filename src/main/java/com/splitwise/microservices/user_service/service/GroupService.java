@@ -7,7 +7,6 @@ import com.splitwise.microservices.user_service.entity.Group;
 import com.splitwise.microservices.user_service.entity.GroupMemberDetails;
 import com.splitwise.microservices.user_service.enums.ActivityType;
 import com.splitwise.microservices.user_service.external.ActivityRequest;
-import com.splitwise.microservices.user_service.kafka.KafkaProducer;
 import com.splitwise.microservices.user_service.model.GroupDataResponse;
 import com.splitwise.microservices.user_service.model.GroupMember;
 import com.splitwise.microservices.user_service.repository.GroupMemberDetailsRepository;
@@ -34,8 +33,6 @@ public class GroupService{
     @Lazy
     UserService userService;
     @Autowired
-    KafkaProducer kafkaProducer;
-    @Autowired
     ActivityClient activityClient;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GroupService.class);
@@ -46,8 +43,7 @@ public class GroupService{
 
     public GroupMemberDetails addGroupMember(GroupMemberDetails groupMemberDetails) {
         GroupMemberDetails savedGroupMemberDetails = groupMemberDetailsRepository.save(groupMemberDetails);
-        //createGroupMemberActivity(ActivityType.USER_ADDED,groupMemberDetails);
-        //activityClient.evictUserCache(groupMemberDetails.getGroupId());
+        createGroupMemberActivity(ActivityType.USER_ADDED,groupMemberDetails);
         return savedGroupMemberDetails;
     }
 
@@ -78,13 +74,11 @@ public class GroupService{
             activityRequest.setMessage(sb.toString());
             try
             {
-                Gson gson = new Gson();
-                String activityJson = gson.toJson(activityRequest);
-                kafkaProducer.sendMessage(activityJson);
+                //Send to Orchestrate
             }
             catch(Exception ex)
             {
-                LOGGER.error("Error occurred while sending User Message to Kafka Topic ",ex);
+                LOGGER.error("Error occurred in createGroupMemberActivity()",ex);
             }
         }
     }
