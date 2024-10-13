@@ -1,33 +1,61 @@
 package com.splitwise.microservices.user_service.configuration;
 
+import com.splitwise.microservices.user_service.entity.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
 
 public class CustomUserDetailService implements UserDetails {
+    private final User user;
 
-    private Long userId;
-    private String username;
-    private String password;
-
-    public Long getUserId() {
-        return userId;
+    public CustomUserDetailService(User user) {
+        this.user = user;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        // Populate the authorities/roles
+        return Collections.emptyList(); // or use actual roles
     }
 
     @Override
     public String getPassword() {
-        return "";
+        return user.getPassword();
+    }
+
+    public Long getUserId(){
+        return user.getUserId();
     }
 
     @Override
     public String getUsername() {
-        return "";
+        return user.getEmailId();
     }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
 }

@@ -31,27 +31,18 @@ import java.util.Optional;
 public class UserController {
     @Autowired
     UserService userService;
-    @Autowired
-    private JwtUtils jwtUtils;
-    @Autowired
-    AuthenticationManager authenticationManager;
-    @Autowired
-    BCryptPasswordEncoder encoder;
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
     @PostMapping("/register-user")
     public ResponseEntity<String> registerUser(@RequestBody User user)
     {
-        //Todo Check if email or phone number already exists if yes then redirect to login
         if(user == null)
         {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        String encryptedPassword = encoder.encode(user.getPassword());
-        user.setPassword(encryptedPassword);
-        User savedUser = userService.saveUser(user);
-        if(null != savedUser)
+        Boolean isUserRegistered = userService.registerNewUser(user);
+        if(isUserRegistered)
         {
            return new ResponseEntity<>("User Saved successfully",HttpStatus.OK);
         }
@@ -63,44 +54,11 @@ public class UserController {
     @PostMapping("/login-user")
     public ResponseEntity<?> loginUser(@RequestBody UserCredentials userCredentials)
     {
-        Authentication authentication;
-        LoginResponse loginResponse;
         if(userCredentials == null)
         {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        //Authentication the user credentials
-        try
-        {
-            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userCredentials.getUserName(),
-                            userCredentials.getPassword()));
-            if(authentication.isAuthenticated())
-            {
-                //Authentication Successfully Completed Let's generate the JWT Token
-                UserDetails userDetails = (UserDetails) authentication.getPrincipal(); //Principal -> Authenticated User
-                String jwtToken = jwtUtils.generateTokenFromUsername(userDetails);
-                Long userId = ((CustomUserDetailService) userDetails).getUserId();
-                loginResponse = LoginResponse.builder()
-                        .jwtToken(jwtToken)
-                        .userName(userDetails.getUsername())
-                        .userId(userId)
-                        .build();
-                //Authentication Completed, Set the Authentication object into the Spring Context for future requests
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
-            else
-            {
-                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-            }
-        }
-        catch(AuthenticationException ex)
-        {
-            Map<String,Object> map = new HashMap<>();
-            map.put("message","Bad Credentials");
-            map.put("status",false);
-            return new ResponseEntity<>(map, HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(loginResponse,HttpStatus.OK);
+        return userService.authenticateUserCredential(userCredentials);
     }
 
     @GetMapping("/get-user/{userId}")

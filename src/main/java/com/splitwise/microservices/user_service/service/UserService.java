@@ -1,9 +1,23 @@
 package com.splitwise.microservices.user_service.service;
 
+import com.splitwise.microservices.user_service.configuration.CustomUserDetailService;
 import com.splitwise.microservices.user_service.constants.StringConstants;
 import com.splitwise.microservices.user_service.entity.User;
+import com.splitwise.microservices.user_service.jwt.JwtUtils;
+import com.splitwise.microservices.user_service.model.LoginResponse;
+import com.splitwise.microservices.user_service.model.UserCredentials;
 import com.splitwise.microservices.user_service.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -17,6 +31,13 @@ public class UserService{
     UserRepository userRepository;
     @Autowired
     GroupService groupService;
+    @Autowired
+    JwtUtils jwtUtils;
+    @Autowired
+    PasswordEncoder encoder;
+    @Autowired
+    AuthenticationManager authenticationManager;
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
     public User saveUser(User user) {
 
@@ -113,5 +134,54 @@ public class UserService{
         List<User> usersList = userRepository.findByUserIdIn(membersUserIds);
         userNameMap = getUserNamesMap(membersUserIds);
         return userNameMap;
+    }
+
+    public ResponseEntity<?> authenticateUserCredential(UserCredentials userCredentials) {
+        Authentication authentication;
+        LoginResponse loginResponse;
+        try
+        {
+            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userCredentials.getUserName(),
+                    userCredentials.getPassword()));
+            if(authentication.isAuthenticated())
+            {
+                //Authentication Successfully Completed Let's generate the JWT Token
+                CustomUserDetailService userDetails = (CustomUserDetailService) authentication.getPrincipal(); //Principal -> Authenticated User
+                String jwtToken = jwtUtils.generateTokenFromUsername(userDetails);
+                loginResponse = LoginResponse.builder()
+                        .jwtToken(jwtToken)
+                        .userName(userDetails.getUser().getFirstName())
+                        .userId(userDetails.getUserId())
+                        .build();
+                //Authentication Completed, Set the Authentication object into the Spring Context for future requests
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+            else
+            {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
+        }
+        catch(AuthenticationException ex)
+        {
+            LOGGER.error("Unable to login with the given credentials "+ex);
+            Map<String,Object> map = new HashMap<>();
+            map.put("message","Bad Credentials");
+            map.put("status",false);
+            return new ResponseEntity<>(map, HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(loginResponse,HttpStatus.OK);
+    }
+
+    public Boolean registerNewUser(User user) {
+        Boolean isUserRegistered = false;
+        String encryptedPassword = encoder.encode(user.getPassword());
+        user.setPassword(encryptedPassword);
+        User savedUser = saveUser(user);
+        if(savedUser != null){
+            isUserRegistered = true;
+        }
+
+        return isUserRegistered;
+
     }
 }
