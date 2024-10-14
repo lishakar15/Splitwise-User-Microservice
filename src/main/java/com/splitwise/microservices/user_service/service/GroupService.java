@@ -1,14 +1,16 @@
 package com.splitwise.microservices.user_service.service;
 
-import com.google.gson.Gson;
 import com.splitwise.microservices.user_service.clients.ActivityClient;
 import com.splitwise.microservices.user_service.constants.StringConstants;
 import com.splitwise.microservices.user_service.entity.Group;
 import com.splitwise.microservices.user_service.entity.GroupMemberDetails;
+import com.splitwise.microservices.user_service.entity.User;
 import com.splitwise.microservices.user_service.enums.ActivityType;
+import com.splitwise.microservices.user_service.external.Activity;
 import com.splitwise.microservices.user_service.external.ActivityRequest;
 import com.splitwise.microservices.user_service.model.GroupDataResponse;
 import com.splitwise.microservices.user_service.model.GroupMember;
+import com.splitwise.microservices.user_service.model.UserModel;
 import com.splitwise.microservices.user_service.repository.GroupMemberDetailsRepository;
 import com.splitwise.microservices.user_service.repository.GroupRepository;
 import org.slf4j.Logger;
@@ -17,14 +19,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class GroupService{
+public class GroupService {
     @Autowired
     GroupRepository groupRepository;
     @Autowired
@@ -43,42 +42,41 @@ public class GroupService{
 
     public GroupMemberDetails addGroupMember(GroupMemberDetails groupMemberDetails) {
         GroupMemberDetails savedGroupMemberDetails = groupMemberDetailsRepository.save(groupMemberDetails);
-        createGroupMemberActivity(ActivityType.USER_ADDED,groupMemberDetails);
+        createGroupMemberActivity(ActivityType.USER_ADDED, groupMemberDetails);
         return savedGroupMemberDetails;
     }
 
     private void createGroupMemberActivity(ActivityType activityType, GroupMemberDetails groupMemberDetails) {
-        if(groupMemberDetails != null)
-        {
-            ActivityRequest activityRequest = new ActivityRequest();
-            activityRequest.setActivityType(activityType);
-            activityRequest.setGroupId(groupMemberDetails.getGroupId());
-            activityRequest.setCreateDate(groupMemberDetails.getJoinedAt());
-            StringBuilder sb = new StringBuilder();
-            String groupName = getGroupNameById(groupMemberDetails.getGroupId());
-            if(ActivityType.USER_ADDED.equals(activityType))
-            {
-                sb.append(StringConstants.USER_ID_PREFIX);
-                sb.append(groupMemberDetails.getUserId());
-                sb.append(StringConstants.USER_ID_SUFFIX);
-                sb.append(StringConstants.USER_JOINED_GROUP);
-            }
-            else if(ActivityType.USER_REMOVED.equals(activityType))
-            {
-                sb.append(StringConstants.USER_ID_PREFIX);
-                sb.append(groupMemberDetails.getUserId());
-                sb.append(StringConstants.USER_ID_SUFFIX);
-                sb.append(StringConstants.USER_LEFT_GROUP);;
-            }
-            sb.append(groupName);
-            activityRequest.setMessage(sb.toString());
-            try
-            {
+        if (groupMemberDetails != null) {
+            try {
+                Activity activity = Activity.builder()
+                        .activityType(activityType)
+                        .createDate(new Date())
+                        .groupId(groupMemberDetails.getGroupId())
+                        .build();
+
+                StringBuilder sb = new StringBuilder();
+                String groupName = getGroupNameById(groupMemberDetails.getGroupId());
+                String userName = userService.getUserNameById(groupMemberDetails.getUserId());
+                if (ActivityType.USER_ADDED.equals(activityType)) {
+                    sb.append(userName);
+                    sb.append(StringConstants.USER_JOINED_GROUP);
+                } else if (ActivityType.USER_REMOVED.equals(activityType)) {
+                    sb.append(userName);
+                    sb.append(StringConstants.USER_LEFT_GROUP);
+                }
+                sb.append(groupName);
+                activity.setMessage(sb.toString());
+                List<Long> groupMemberIds = getAllUserIdByGroupId(groupMemberDetails.getGroupId());
+                ActivityRequest activityRequest = ActivityRequest.builder()
+                        .activity(activity)
+                        .userIds(groupMemberIds)
+                        .build();
+
                 //Send to Orchestrate
-            }
-            catch(Exception ex)
-            {
-                LOGGER.error("Error occurred in createGroupMemberActivity()",ex);
+                activityClient.sendActivityRequest(activityRequest);
+            } catch (Exception ex) {
+                LOGGER.error("Error occurred in createGroupMemberActivity()", ex);
             }
         }
     }
@@ -86,30 +84,27 @@ public class GroupService{
     public List<Long> getAllUserIdByGroupId(Long groupId) {
         return groupMemberDetailsRepository.getAllUserIdByGroupId(groupId);
     }
+
     public List<String> getGroupNamesById(List<Long> groupIds) {
         List<String> groupNameList = new ArrayList<>();
-        for(Long groupId : groupIds)
-        {
+        for (Long groupId : groupIds) {
             String groupName = groupRepository.getGroupNameById(groupId);
             groupNameList.add(groupName);
         }
         return groupNameList;
     }
-    public List<GroupDataResponse> getUserGroupDataList(List<Long> groupIds)
-    {
-        if(groupIds == null )
-        {
+
+    public List<GroupDataResponse> getUserGroupDataList(List<Long> groupIds) {
+        if (groupIds == null) {
             return null;
         }
         List<GroupDataResponse> groupDataResponseList = new ArrayList<>();
-        for(Long groupId : groupIds)
-        {
+        for (Long groupId : groupIds) {
             List<GroupMember> groupMembers = new ArrayList<>();
             GroupDataResponse groupDataResponse = new GroupDataResponse();
             Map<Long, String> groupMembersMap = userService.getUserNameMapByGroupId(groupId);
             String groupName = groupRepository.getGroupNameById(groupId);
-            for(Map.Entry<Long,String> memberMapEntry : groupMembersMap.entrySet())
-            {
+            for (Map.Entry<Long, String> memberMapEntry : groupMembersMap.entrySet()) {
                 GroupMember groupMember = GroupMember.builder()
                         .userId(memberMapEntry.getKey())
                         .userName(memberMapEntry.getValue())
@@ -136,25 +131,24 @@ public class GroupService{
 
     public boolean deleteGroupMember(Long userId, Long groupId) {
 
-        int rowsAffected = groupMemberDetailsRepository.deleteGroupMember(userId,groupId);
-        if(rowsAffected>0)
-        {
-            GroupMemberDetails groupMemberDetails= new GroupMemberDetails();
+        int rowsAffected = groupMemberDetailsRepository.deleteGroupMember(userId, groupId);
+        if (rowsAffected > 0) {
+            GroupMemberDetails groupMemberDetails = new GroupMemberDetails();
             groupMemberDetails.setUserId(userId);
             groupMemberDetails.setGroupId(groupId);
-            createGroupMemberActivity(ActivityType.USER_REMOVED,groupMemberDetails);
+            createGroupMemberActivity(ActivityType.USER_REMOVED, groupMemberDetails);
         }
         return rowsAffected > 0 ? true : false;
     }
 
     public String getGroupNameById(Long groupId) {
-        return  groupRepository.getGroupNameById(groupId);
+        return groupRepository.getGroupNameById(groupId);
     }
 
     public GroupDataResponse getUserDataByGroupId(Long groupId, Long userId) {
         GroupDataResponse groupDataResponse = null;
         GroupMemberDetails groupMemberDetails = groupMemberDetailsRepository.findByGroupIdAndUserId(groupId, userId);
-        if (groupMemberDetails != null && groupMemberDetails.getGroupMemberId()>0) {
+        if (groupMemberDetails != null && groupMemberDetails.getGroupMemberId() > 0) {
             groupDataResponse = new GroupDataResponse();
             List<GroupMember> groupMembers = new ArrayList<>();
             Map<Long, String> groupMembersMap = userService.getUserNameMapByGroupId(groupId);
@@ -174,15 +168,32 @@ public class GroupService{
     }
 
     public Map<Long, String> getGroupNameMapByUserId(Long userId) {
-        Map<Long,String> groupNameMap = new HashMap<>();
+        Map<Long, String> groupNameMap = new HashMap<>();
         List<Long> groupIds = getAllGroupIdsOfUser(userId);
         List<Group> groupList = groupRepository.findByGroupIdIn(groupIds);
-        groupNameMap = groupList.stream().collect(Collectors.toMap(g -> g.getGroupId(), g-> g.getGroupName()));
+        groupNameMap = groupList.stream().collect(Collectors.toMap(g -> g.getGroupId(), g -> g.getGroupName()));
         return groupNameMap;
     }
-    public List<Long> getGroupMembersUserIdByGroupIds(List<Long> groupIds)
-    {
+
+    public List<Long> getGroupMembersUserIdByGroupIds(List<Long> groupIds) {
         List<Long> membersUserId = groupMemberDetailsRepository.getUserIdsByGroupIdIn(groupIds);
         return membersUserId;
+    }
+
+    public List<UserModel> getGroupMembersByUserId(Long userId) {
+        Set<Long> uniqueUserIds = new HashSet<>();
+        List<Long> groupIds = getAllGroupIdsOfUser(userId);
+        List<Long> userIds = groupMemberDetailsRepository.getAllUserIdInGroupId(groupIds);
+        uniqueUserIds.addAll(userIds);
+        List<User> users = userService.getUsersDetailById(new ArrayList<>(uniqueUserIds));
+        return userService.getUserInfoMapFromUsers(users);
+    }
+
+    public List<UserModel> getGroupMembersByGroupId(Long groupId) {
+        Set<Long> uniqueUserIds = new HashSet<>();
+        List<Long> userIds = groupMemberDetailsRepository.getAllUserIdByGroupId(groupId);
+        uniqueUserIds.addAll(userIds);
+        List<User> users = userService.getUsersDetailById(new ArrayList<>(uniqueUserIds));
+        return userService.getUserInfoMapFromUsers(users);
     }
 }

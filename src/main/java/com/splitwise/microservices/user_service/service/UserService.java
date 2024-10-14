@@ -4,8 +4,10 @@ import com.splitwise.microservices.user_service.configuration.CustomUserDetailSe
 import com.splitwise.microservices.user_service.constants.StringConstants;
 import com.splitwise.microservices.user_service.entity.User;
 import com.splitwise.microservices.user_service.jwt.JwtUtils;
+import com.splitwise.microservices.user_service.mapper.UserMapper;
 import com.splitwise.microservices.user_service.model.LoginResponse;
 import com.splitwise.microservices.user_service.model.UserCredentials;
+import com.splitwise.microservices.user_service.model.UserModel;
 import com.splitwise.microservices.user_service.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +33,8 @@ public class UserService{
     UserRepository userRepository;
     @Autowired
     GroupService groupService;
+    @Autowired
+    UserMapper userMapper;
     @Autowired
     JwtUtils jwtUtils;
     @Autowired
@@ -183,5 +187,9 @@ public class UserService{
 
         return isUserRegistered;
 
+    }
+
+    public List<UserModel> getUserInfoMapFromUsers(List<User> users) {
+        return userMapper.getUserModel(users);
     }
 }
