@@ -170,6 +170,24 @@ public class GroupController {
         }
         return new ResponseEntity<>(groupNameMap,HttpStatus.OK);
     }
+    @GetMapping("/get-group-members-info/user/{userId}")
+    public ResponseEntity<List<UserModel>> getAllGroupMembersInfoByUserId(@PathVariable("userId") Long userId){
+        if(userId == null){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        List<UserModel> userInfoList = groupService.getGroupMembersByUserId(userId);
+
+        return new ResponseEntity<>(userInfoList, HttpStatus.OK);
+    }
+    @GetMapping("/get-group-members-info/group/{groupId}")
+    public ResponseEntity<List<UserModel>> getAllGroupMembersInfoByGroupId(@PathVariable("groupId") Long groupId){
+        if(groupId == null){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        List<UserModel> userInfoList = groupService.getGroupMembersByGroupId(groupId);
+
+        return new ResponseEntity<>(userInfoList, HttpStatus.OK);
+    }
 
     /**
      * Method to delete the group (Only Admin can perform this)

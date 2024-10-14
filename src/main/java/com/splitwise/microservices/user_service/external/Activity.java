@@ -1,9 +1,6 @@
 package com.splitwise.microservices.user_service.external;
 
 import com.splitwise.microservices.user_service.enums.ActivityType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +13,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ActivityRequest {
-    private  Activity activity;
-    private List<Long> userIds;
+public class Activity {
+    private Long groupId;
+    private Long settlementId;
+    private Long expenseId;
+    private ActivityType activityType;
+    private String message;
+    private Date createDate;
+    private List<ChangeLog> changeLogs;
 }

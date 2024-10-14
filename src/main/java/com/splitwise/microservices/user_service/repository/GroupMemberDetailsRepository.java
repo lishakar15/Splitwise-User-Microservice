@@ -16,6 +16,9 @@ public interface GroupMemberDetailsRepository extends JpaRepository<GroupMemberD
     @Query("select gm.userId from GroupMemberDetails gm where gm.groupId =:groupId")
     public List<Long> getAllUserIdByGroupId(@Param("groupId") Long groupId);
 
+    @Query("SELECT gm.userId FROM GroupMemberDetails gm WHERE gm.groupId IN :groupIds")
+    public List<Long> getAllUserIdInGroupId(@Param("groupIds") List<Long> groupIds);
+
     @Query("SELECT DISTINCT gm.userId FROM GroupMemberDetails gm WHERE gm.groupId IN :groupIds")
     public List<Long> getUserIdsByGroupIdIn(@Param("groupIds") List<Long> groupIds);
 
