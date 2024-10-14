@@ -126,14 +126,14 @@ public class GroupController {
         return new ResponseEntity<>(groupNameMap,HttpStatus.OK);
     }
 
-    @GetMapping("/get-group/{groupId}")
-    public ResponseEntity<GroupDataResponse> getGroupDataByUserId(@PathVariable("groupId") Long groupId)
+    @GetMapping("/get-group/{groupId}/{userId}")
+    public ResponseEntity<GroupDataResponse> getGroupDataByUserId(@PathVariable("groupId") Long groupId, @PathVariable("userId") Long userId)
     {
         if(groupId == null)
         {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        GroupDataResponse groupDataResponse = groupService.getUserDataByGroupId(groupId);
+        GroupDataResponse groupDataResponse = groupService.getUserDataByGroupId(groupId, userId);
         return new ResponseEntity<>(groupDataResponse,HttpStatus.OK);
     }
 

@@ -151,22 +151,25 @@ public class GroupService{
         return  groupRepository.getGroupNameById(groupId);
     }
 
-    public GroupDataResponse getUserDataByGroupId(Long groupId){
-        List<GroupMember> groupMembers = new ArrayList<>();
-        GroupDataResponse groupDataResponse = new GroupDataResponse();
-        Map<Long, String> groupMembersMap = userService.getUserNameMapByGroupId(groupId);
-        String groupName = groupRepository.getGroupNameById(groupId);
-        for(Map.Entry<Long,String> memberMapEntry : groupMembersMap.entrySet())
-        {
-            GroupMember groupMember = GroupMember.builder()
-                    .userId(memberMapEntry.getKey())
-                    .userName(memberMapEntry.getValue())
-                    .build();
-            groupMembers.add(groupMember);
+    public GroupDataResponse getUserDataByGroupId(Long groupId, Long userId) {
+        GroupDataResponse groupDataResponse = null;
+        GroupMemberDetails groupMemberDetails = groupMemberDetailsRepository.findByGroupIdAndUserId(groupId, userId);
+        if (groupMemberDetails != null && groupMemberDetails.getGroupMemberId()>0) {
+            groupDataResponse = new GroupDataResponse();
+            List<GroupMember> groupMembers = new ArrayList<>();
+            Map<Long, String> groupMembersMap = userService.getUserNameMapByGroupId(groupId);
+            String groupName = groupRepository.getGroupNameById(groupId);
+            for (Map.Entry<Long, String> memberMapEntry : groupMembersMap.entrySet()) {
+                GroupMember groupMember = GroupMember.builder()
+                        .userId(memberMapEntry.getKey())
+                        .userName(memberMapEntry.getValue())
+                        .build();
+                groupMembers.add(groupMember);
+            }
+            groupDataResponse.setGroupName(groupName);
+            groupDataResponse.setGroupId(groupId);
+            groupDataResponse.setGroupMembers(groupMembers);
         }
-        groupDataResponse.setGroupName(groupName);
-        groupDataResponse.setGroupId(groupId);
-        groupDataResponse.setGroupMembers(groupMembers);
         return groupDataResponse;
     }
 
