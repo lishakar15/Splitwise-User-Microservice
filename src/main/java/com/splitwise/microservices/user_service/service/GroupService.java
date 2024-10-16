@@ -8,6 +8,8 @@ import com.splitwise.microservices.user_service.entity.User;
 import com.splitwise.microservices.user_service.enums.ActivityType;
 import com.splitwise.microservices.user_service.external.Activity;
 import com.splitwise.microservices.user_service.external.ActivityRequest;
+import com.splitwise.microservices.user_service.mapper.GroupMapper;
+import com.splitwise.microservices.user_service.model.GroupDetailsModel;
 import com.splitwise.microservices.user_service.model.GroupDataResponse;
 import com.splitwise.microservices.user_service.model.GroupMember;
 import com.splitwise.microservices.user_service.model.UserModel;
@@ -18,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,17 +36,37 @@ public class GroupService {
     UserService userService;
     @Autowired
     ActivityClient activityClient;
+    @Autowired
+    GroupMapper groupMapper;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GroupService.class);
-
-    public Group saveGroupDetails(Group group) {
-        return groupRepository.save(group);
+    @Transactional
+    public Boolean saveGroupDetailsFromRequest(GroupDetailsModel groupRequest) {
+        if(groupRequest != null)
+        {
+            Group savedGroup = groupRepository.save(groupRequest.getGroup());
+            if(savedGroup == null)
+            {
+               return false;
+            }
+            List<GroupMemberDetails> groupMemberDetailsList = groupMapper.getGroupMemberDetailsFromGroup(savedGroup.getGroupId(), groupRequest.getGroupMemberDetails());
+            return saveGroupMembers(groupMemberDetailsList);
+        }
+        return false;
     }
 
-    public GroupMemberDetails addGroupMember(GroupMemberDetails groupMemberDetails) {
-        GroupMemberDetails savedGroupMemberDetails = groupMemberDetailsRepository.save(groupMemberDetails);
-        createGroupMemberActivity(ActivityType.USER_ADDED, groupMemberDetails);
-        return savedGroupMemberDetails;
+    public Boolean saveGroupMembers(List<GroupMemberDetails> groupMemberDetails) {
+        Boolean isGroupSaved = false;
+        try {
+            groupMemberDetailsRepository.saveAll(groupMemberDetails);
+            for (GroupMemberDetails memberDetails : groupMemberDetails) {
+                createGroupMemberActivity(ActivityType.USER_ADDED, memberDetails);
+            }
+            isGroupSaved = true;
+        } catch (Exception ex) {
+            LOGGER.error("Error occurred while saving Group Members data");
+        }
+        return isGroupSaved;
     }
 
     private void createGroupMemberActivity(ActivityType activityType, GroupMemberDetails groupMemberDetails) {
@@ -195,5 +218,34 @@ public class GroupService {
         uniqueUserIds.addAll(userIds);
         List<User> users = userService.getUsersDetailById(new ArrayList<>(uniqueUserIds));
         return userService.getUserInfoMapFromUsers(users);
+    }
+
+    public void joinUserInGroup(Long userId, Long groupId){
+        if(userId !=  null && groupId != null)
+        {
+            GroupMemberDetails groupMemberDetails = GroupMemberDetails.builder()
+                    .userId(userId)
+                    .groupId(groupId)
+                    .joinedAt(new Date())
+                    .build();
+            joinAsGroupMember(groupMemberDetails);
+        }
+    }
+
+    public void joinAsGroupMember(GroupMemberDetails groupMemberDetails) {
+        GroupMemberDetails gmd = groupMemberDetailsRepository.save(groupMemberDetails);
+        if(gmd != null)
+        createGroupMemberActivity(ActivityType.USER_ADDED, groupMemberDetails);
+    }
+
+    public GroupDetailsModel getGroupDetailsByGroupId(Long groupId) {
+        GroupDetailsModel groupDetailsModel = new GroupDetailsModel();
+        Optional<Group> optional = groupRepository.findById(groupId);
+        if(optional.isPresent()){
+            groupDetailsModel.setGroup(optional.get());
+            List<GroupMemberDetails> memberDetails = groupMemberDetailsRepository.findByGroupId(groupId);
+            groupDetailsModel.setGroupMemberDetails(memberDetails);
+        }
+        return groupDetailsModel;
     }
 }

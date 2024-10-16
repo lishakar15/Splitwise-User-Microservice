@@ -3,8 +3,8 @@ package com.splitwise.microservices.user_service.controller;
 import com.splitwise.microservices.user_service.entity.Group;
 import com.splitwise.microservices.user_service.entity.GroupMemberDetails;
 import com.splitwise.microservices.user_service.entity.User;
-import com.splitwise.microservices.user_service.mapper.GroupMapper;
 import com.splitwise.microservices.user_service.mapper.UserMapper;
+import com.splitwise.microservices.user_service.model.GroupDetailsModel;
 import com.splitwise.microservices.user_service.model.GroupDataResponse;
 import com.splitwise.microservices.user_service.model.UserModel;
 import com.splitwise.microservices.user_service.service.GroupService;
@@ -29,36 +29,39 @@ public class GroupController {
     UserService userService;
     @Autowired
     UserMapper userMapper;
-    @Autowired
-    GroupMapper groupMapper;
 
     @PostMapping("/create-group")
-    public ResponseEntity<String> createGroup(@RequestBody Group group)
+    public ResponseEntity<String> createGroup(@RequestBody GroupDetailsModel groupRequest)
     {
-        if(group == null)
+        if(groupRequest == null)
         {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         //Save group details
-        Group savedGroup = groupService.saveGroupDetails(group);
-        if(savedGroup == null)
-        {
+        Boolean isGroupSaved = groupService.saveGroupDetailsFromRequest(groupRequest);
+
+        if(!isGroupSaved){
             return new ResponseEntity<>("Error occurred while saving Group Details",HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        //Add the creator as a Group Member
-        GroupMemberDetails groupMemberDetails = groupMapper.getGroupMemberDetailsFromGroup(savedGroup);
-        groupService.addGroupMember(groupMemberDetails);
         return new ResponseEntity<>("Group Details Saved Successfully",HttpStatus.OK);
     }
+    @GetMapping("/get-group-details/{groupId}")
+    public ResponseEntity<GroupDetailsModel> getGroupDetailsByGroupId(@PathVariable("groupId") Long groupId ){
+        if(groupId == null){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        GroupDetailsModel groupDetailsModel = groupService.getGroupDetailsByGroupId(groupId);
+        return new ResponseEntity<>(groupDetailsModel, HttpStatus.OK);
+    }
 
-    @PostMapping("/add-members")
-    public ResponseEntity<String> addGroupMembers(@RequestBody GroupMemberDetails groupMemberDetails)
+    @PostMapping("/join-group")
+    public ResponseEntity<String> joinAsGroupMember(@RequestBody GroupMemberDetails groupMemberDetails)
     {
         if(groupMemberDetails == null)
         {
             return new ResponseEntity<>("Invalid input to add members",HttpStatus.NOT_FOUND);
         }
-        GroupMemberDetails groupMemberDetails1 = groupService.addGroupMember(groupMemberDetails);
+        groupService.joinAsGroupMember(groupMemberDetails);
         return new ResponseEntity<>("Member added successfully to the group",HttpStatus.OK);
 
     }
@@ -69,7 +72,7 @@ public class GroupController {
         {
             return new ResponseEntity<>("Error occurred while updating Group",HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        Group updatedGroup = groupService.saveGroupDetails(group);
+        //Group updatedGroup = groupService.saveGroupDetails(group);
         return new ResponseEntity<>("Group updated successfully",HttpStatus.OK);
     }
     @GetMapping("/get-members/{groupId}")
