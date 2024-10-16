@@ -34,7 +34,7 @@ public interface GroupMemberDetailsRepository extends JpaRepository<GroupMemberD
     @Transactional
     @Query("delete from GroupMemberDetails gm where gm.groupId =:groupId and gm.userId=:userId")
     public int deleteGroupMember(Long userId, Long groupId);
-
+    public List<GroupMemberDetails> findByGroupId(Long groupId);
     public GroupMemberDetails findByGroupIdAndUserId(Long groupId, Long userId);
 }
 

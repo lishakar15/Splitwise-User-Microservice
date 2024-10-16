@@ -4,20 +4,19 @@ import com.splitwise.microservices.user_service.entity.Group;
 import com.splitwise.microservices.user_service.entity.GroupMemberDetails;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 public class GroupMapper {
 
-    public GroupMemberDetails getGroupMemberDetailsFromGroup(Group group)
+    public List<GroupMemberDetails> getGroupMemberDetailsFromGroup(Long groupId, List<GroupMemberDetails> groupMemberDetails)
     {
-        GroupMemberDetails groupMemberDetails = null;
-        if(group != null)
-        {
-            groupMemberDetails = new GroupMemberDetails();
-            groupMemberDetails.setGroupId(group.getGroupId());
-            groupMemberDetails.setUserId(group.getCreatedBy());
-            groupMemberDetails.setJoinedAt(group.getCreatedAt());
+        List<GroupMemberDetails> groupMemberDetailsList = new ArrayList<>();
+        for(GroupMemberDetails memberDetails : groupMemberDetails){
+            memberDetails.setGroupId(groupId);
+            groupMemberDetailsList.add(memberDetails);
         }
-
-        return groupMemberDetails;
+        return groupMemberDetailsList;
     }
 }
