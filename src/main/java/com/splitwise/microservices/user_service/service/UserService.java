@@ -2,12 +2,15 @@ package com.splitwise.microservices.user_service.service;
 
 import com.splitwise.microservices.user_service.configuration.CustomUserDetailService;
 import com.splitwise.microservices.user_service.constants.StringConstants;
+import com.splitwise.microservices.user_service.entity.Friends;
 import com.splitwise.microservices.user_service.entity.User;
 import com.splitwise.microservices.user_service.jwt.JwtUtils;
 import com.splitwise.microservices.user_service.mapper.UserMapper;
+import com.splitwise.microservices.user_service.model.InviteRequest;
 import com.splitwise.microservices.user_service.model.LoginResponse;
 import com.splitwise.microservices.user_service.model.UserCredentials;
 import com.splitwise.microservices.user_service.model.UserModel;
+import com.splitwise.microservices.user_service.repository.FriendsRepository;
 import com.splitwise.microservices.user_service.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +44,8 @@ public class UserService{
     PasswordEncoder encoder;
     @Autowired
     AuthenticationManager authenticationManager;
+    @Autowired
+    FriendsRepository friendsRepository;
     private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
 
     public User saveUser(User user) {
@@ -191,5 +196,21 @@ public class UserService{
 
     public List<UserModel> getUserInfoMapFromUsers(List<User> users) {
         return userMapper.getUserModel(users);
+    }
+
+    public Boolean saveFriendsFromUserInvite(InviteRequest inviteRequest) {
+        Boolean inviteAccepted = false;
+        if(inviteRequest != null)
+        {
+            Friends friends = Friends.builder()
+                    .userId1(inviteRequest.getUserId1())
+                    .userId2(inviteRequest.getUserId2())
+                    .createdBy(inviteRequest.getCreatedBy())
+                    .createdAt(new Date())
+                    .build();
+            friendsRepository.save(friends);
+            inviteAccepted = true;
+        }
+        return inviteAccepted;
     }
 }

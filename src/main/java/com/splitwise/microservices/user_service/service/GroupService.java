@@ -248,4 +248,13 @@ public class GroupService {
         }
         return groupDetailsModel;
     }
+
+    public List<GroupMember> getGroupMembersListByUserId(Long userId){
+        Set<Long> uniqueUserIds = new HashSet<>();
+        List<Long> groupIds = getAllGroupIdsOfUser(userId);
+        List<Long> userIds = groupMemberDetailsRepository.getAllUserIdInGroupId(groupIds);
+        uniqueUserIds.addAll(userIds);
+        List<User> users = userService.getUsersDetailById(new ArrayList<>(uniqueUserIds));
+        return groupMapper.getGroupMembersFromUsers(users);
+    }
 }

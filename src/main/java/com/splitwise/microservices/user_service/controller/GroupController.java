@@ -6,6 +6,7 @@ import com.splitwise.microservices.user_service.entity.User;
 import com.splitwise.microservices.user_service.mapper.UserMapper;
 import com.splitwise.microservices.user_service.model.GroupDetailsModel;
 import com.splitwise.microservices.user_service.model.GroupDataResponse;
+import com.splitwise.microservices.user_service.model.GroupMember;
 import com.splitwise.microservices.user_service.model.UserModel;
 import com.splitwise.microservices.user_service.service.GroupService;
 import com.splitwise.microservices.user_service.service.UserService;
@@ -75,27 +76,15 @@ public class GroupController {
         //Group updatedGroup = groupService.saveGroupDetails(group);
         return new ResponseEntity<>("Group updated successfully",HttpStatus.OK);
     }
-    @GetMapping("/get-members/{groupId}")
-    public ResponseEntity<List<UserModel>> getGroupMembers(@PathVariable("groupId") Long groupId)
+    @GetMapping("/get-all-members/{userId}")
+    public ResponseEntity<List<GroupMember>> getGroupMembers(@PathVariable("userId") Long userId)
     {
-        if(groupId == null)
+        if(userId == null)
         {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        //Get Member Ids
-        List<Long> memberIds = groupService.getAllUserIdByGroupId(groupId);
-        if(memberIds == null || memberIds.isEmpty())
-        {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        //Get User Details with Member Ids
-        List<User> users = userService.getUsersDetailById(memberIds);
-        if(users == null || users.isEmpty())
-        {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        List<UserModel> memberDetailsList = userMapper.getUserModel(users);
-        return new ResponseEntity<>(memberDetailsList,HttpStatus.OK); //Need to convert to json and return
+        List<GroupMember> groupMemberList = groupService.getGroupMembersListByUserId(userId);
+        return new ResponseEntity<>(groupMemberList,HttpStatus.OK);
     }
 
     /**
