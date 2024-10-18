@@ -62,9 +62,8 @@ public class GroupController {
         {
             return new ResponseEntity<>("Invalid input to add members",HttpStatus.NOT_FOUND);
         }
-        groupService.joinAsGroupMember(groupMemberDetails);
-        return new ResponseEntity<>("Member added successfully to the group",HttpStatus.OK);
-
+        String groupName = groupService.joinAsGroupMember(groupMemberDetails);
+        return new ResponseEntity<>("You joined group "+groupName,HttpStatus.OK);
     }
     @PutMapping("/update-group")
     public ResponseEntity<String> updateGroup(@RequestBody Group group)

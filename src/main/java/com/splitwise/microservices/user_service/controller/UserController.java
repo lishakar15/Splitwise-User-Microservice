@@ -3,6 +3,7 @@ package com.splitwise.microservices.user_service.controller;
 import com.splitwise.microservices.user_service.entity.Friends;
 import com.splitwise.microservices.user_service.entity.User;
 import com.splitwise.microservices.user_service.jwt.JwtUtils;
+import com.splitwise.microservices.user_service.model.InviteLinkRequest;
 import com.splitwise.microservices.user_service.model.InviteRequest;
 import com.splitwise.microservices.user_service.model.LoginResponse;
 import com.splitwise.microservices.user_service.model.UserCredentials;
@@ -73,12 +74,25 @@ public class UserController {
         if(isInviteAccepted)
         {
             String userName = userService.getUserNameById(inviteRequest.getCreatedBy());
-            String message = "Your now friends with "+userName;
-            return new ResponseEntity<>(message, HttpStatus.OK);
+            return new ResponseEntity<>("You are now friends with "+userName, HttpStatus.OK);
         }
         else {
             return new ResponseEntity<>("Invite accept failed", HttpStatus.OK);
         }
+    }
+    @PostMapping("/invite-link")
+    public ResponseEntity<String> getInvitationLink(@RequestBody InviteLinkRequest inviteRequest){
+        if(inviteRequest == null)
+        {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        String link = userService.createInviteLink(inviteRequest);
+        if(link == null)
+        {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(link,HttpStatus.OK);
+
     }
 
     @GetMapping("/get-user/{userId}")

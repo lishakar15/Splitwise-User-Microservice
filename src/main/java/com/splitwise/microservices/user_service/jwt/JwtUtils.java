@@ -27,12 +27,13 @@ public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
     public static final String SECRET = PropertiesReader.getProperty(StringConstants.SECRET);
     public static final String JWT_EXPIRATION_TIME = PropertiesReader.getProperty(StringConstants.JWT_EXPIRATION_TIME);
+    public static final String INVITE_EXPIRATION_TIME = PropertiesReader.getProperty(StringConstants.INVITE_EXPIRATION_TIME);
 
     public String getJwtFromHeader(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         logger.debug("Authorization Header: {}", bearerToken);
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7); // Remove Bearer prefix
+            return bearerToken.substring(7);
         }
         return null;
     }
@@ -43,6 +44,15 @@ public class JwtUtils {
                 .subject(username)
                 .issuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + Integer.valueOf(JWT_EXPIRATION_TIME)))
+                .signWith(key())
+                .compact();
+    }
+
+    public String generateInviteToken() {
+        return Jwts.builder()
+                .setSubject("invite")
+                .claim("type", "invite")
+                .setExpiration(new Date(System.currentTimeMillis() + Integer.valueOf(INVITE_EXPIRATION_TIME)))
                 .signWith(key())
                 .compact();
     }

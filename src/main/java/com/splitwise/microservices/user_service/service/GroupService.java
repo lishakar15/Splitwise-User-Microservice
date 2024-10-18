@@ -2,6 +2,7 @@ package com.splitwise.microservices.user_service.service;
 
 import com.splitwise.microservices.user_service.clients.ActivityClient;
 import com.splitwise.microservices.user_service.constants.StringConstants;
+import com.splitwise.microservices.user_service.entity.Friends;
 import com.splitwise.microservices.user_service.entity.Group;
 import com.splitwise.microservices.user_service.entity.GroupMemberDetails;
 import com.splitwise.microservices.user_service.entity.User;
@@ -13,6 +14,7 @@ import com.splitwise.microservices.user_service.model.GroupDetailsModel;
 import com.splitwise.microservices.user_service.model.GroupDataResponse;
 import com.splitwise.microservices.user_service.model.GroupMember;
 import com.splitwise.microservices.user_service.model.UserModel;
+import com.splitwise.microservices.user_service.repository.FriendsRepository;
 import com.splitwise.microservices.user_service.repository.GroupMemberDetailsRepository;
 import com.splitwise.microservices.user_service.repository.GroupRepository;
 import org.slf4j.Logger;
@@ -38,6 +40,8 @@ public class GroupService {
     ActivityClient activityClient;
     @Autowired
     GroupMapper groupMapper;
+    @Autowired
+    FriendsRepository friendsRepository;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GroupService.class);
     @Transactional
@@ -220,22 +224,46 @@ public class GroupService {
         return userService.getUserInfoMapFromUsers(users);
     }
 
-    public void joinUserInGroup(Long userId, Long groupId){
-        if(userId !=  null && groupId != null)
+    public String joinAsGroupMember(GroupMemberDetails groupMemberDetails) {
+        if(groupMemberDetails != null)
         {
-            GroupMemberDetails groupMemberDetails = GroupMemberDetails.builder()
-                    .userId(userId)
-                    .groupId(groupId)
-                    .joinedAt(new Date())
-                    .build();
-            joinAsGroupMember(groupMemberDetails);
+            GroupMemberDetails existinGroupMemberDetails = groupMemberDetailsRepository.findByGroupIdAndUserId(groupMemberDetails.getGroupId(), groupMemberDetails.getUserId());
+            if(existinGroupMemberDetails == null || existinGroupMemberDetails.getGroupMemberId() == null )
+            {
+                groupMemberDetails.setJoinedAt(new Date());
+                groupMemberDetailsRepository.save(groupMemberDetails);
+                saveFriendsFromInvite(groupMemberDetails);
+                createGroupMemberActivity(ActivityType.USER_ADDED, groupMemberDetails);
+            }
         }
+        return getGroupNameById(groupMemberDetails.getGroupId());
     }
 
-    public void joinAsGroupMember(GroupMemberDetails groupMemberDetails) {
-        GroupMemberDetails gmd = groupMemberDetailsRepository.save(groupMemberDetails);
-        if(gmd != null)
-        createGroupMemberActivity(ActivityType.USER_ADDED, groupMemberDetails);
+    private void saveFriendsFromInvite(GroupMemberDetails groupMemberDetails) {
+        if(groupMemberDetails != null){
+            List<Friends> friendsList = new ArrayList<>();
+            Long currentUserId = groupMemberDetails.getUserId();
+            List<Long> groupMemberIdList = getAllUserIdByGroupId(groupMemberDetails.getGroupId());
+            for(Long memberId : groupMemberIdList)
+            {
+                if(memberId != currentUserId)
+                {
+                    //Check if the friend relation already exists
+                    Boolean isFriendExists = userService.checkForExistingRelationship(memberId, currentUserId);
+                    if(!isFriendExists)
+                    {
+                        Friends friend = Friends.builder()
+                                .userId1(currentUserId)
+                                .userId2(memberId)
+                                .relationShip(StringConstants.GROUP_TYPE)
+                                .createdAt(new Date())
+                                .build();
+                        friendsList.add(friend);
+                    }
+                }
+            }
+            friendsRepository.saveAll(friendsList);
+        }
     }
 
     public GroupDetailsModel getGroupDetailsByGroupId(Long groupId) {

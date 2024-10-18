@@ -6,10 +6,7 @@ import com.splitwise.microservices.user_service.entity.Friends;
 import com.splitwise.microservices.user_service.entity.User;
 import com.splitwise.microservices.user_service.jwt.JwtUtils;
 import com.splitwise.microservices.user_service.mapper.UserMapper;
-import com.splitwise.microservices.user_service.model.InviteRequest;
-import com.splitwise.microservices.user_service.model.LoginResponse;
-import com.splitwise.microservices.user_service.model.UserCredentials;
-import com.splitwise.microservices.user_service.model.UserModel;
+import com.splitwise.microservices.user_service.model.*;
 import com.splitwise.microservices.user_service.repository.FriendsRepository;
 import com.splitwise.microservices.user_service.repository.UserRepository;
 import org.slf4j.Logger;
@@ -202,15 +199,61 @@ public class UserService{
         Boolean inviteAccepted = false;
         if(inviteRequest != null)
         {
-            Friends friends = Friends.builder()
-                    .userId1(inviteRequest.getUserId1())
-                    .userId2(inviteRequest.getUserId2())
-                    .createdBy(inviteRequest.getCreatedBy())
-                    .createdAt(new Date())
-                    .build();
-            friendsRepository.save(friends);
-            inviteAccepted = true;
+            Boolean isFriendshipExists = checkForExistingRelationship(inviteRequest.getUserId1(), inviteRequest.getUserId2());
+            Long userId1 = inviteRequest.getUserId1();
+            Long userId2 = inviteRequest.getUserId2();
+            if(!isFriendshipExists && userId1 != null && userId2 != null && userId1 != userId2)
+            {
+                Friends friends = Friends.builder()
+                        .userId1(userId1)
+                        .userId2(userId2)
+                        .createdBy(inviteRequest.getCreatedBy())
+                        .relationShip(StringConstants.INVITE_TYPE)
+                        .createdAt(new Date())
+                        .build();
+                friendsRepository.save(friends);
+                inviteAccepted = true;
+            }
         }
         return inviteAccepted;
+}
+
+    public Boolean checkForExistingRelationship(Long userId1, Long userId2) {
+        Boolean isRelationExists = false;
+        int count = friendsRepository.findCountByUserId1OrUserId2(userId1, userId2);
+        if (count > 0) {
+            isRelationExists = true;
+        }
+        return isRelationExists;
+    }
+
+    public String createInviteLink(InviteLinkRequest inviteRequest) {
+        String link = null;
+        if(inviteRequest != null && inviteRequest.getBaseUrl() != null)
+        {
+            String baseUrl = inviteRequest.getBaseUrl();
+            StringBuilder sb = new StringBuilder();
+            sb.append(baseUrl);
+            sb.append("/login/");
+            sb.append(StringConstants.QUESTION_MARK);
+            if(inviteRequest.getInviterId() != null){
+                //Create invite link
+                sb.append("invitedBy=");
+                sb.append(inviteRequest.getInviterId());
+
+            }
+            else if(inviteRequest.getGroupId() != null)
+            {
+                //Create join group link
+                sb.append("groupId=");
+                sb.append(inviteRequest.getGroupId());
+            }
+            sb.append(StringConstants.AMPERSAND);
+            sb.append("token=");
+            String token = jwtUtils.generateInviteToken();
+            sb.append(token);
+            link = sb.toString();
+        }
+        return link;
     }
 }

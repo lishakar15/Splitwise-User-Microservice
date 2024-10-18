@@ -11,6 +11,11 @@ public class StringConstants {
 
     public static final String EMPTY_STRING ="";
     public static final String HYPEN ="-";
+    public static final String QUESTION_MARK ="?";
+    public static final String AMPERSAND ="&";
 
     public static final String ROLE_ADMIN ="ADMIN";
+    public static final String INVITE_TYPE= "INVITE";
+    public static final String GROUP_TYPE= "GROUP";
+    public static final String INVITE_EXPIRATION_TIME = "INVITE_EXPIRATION_TIME";
 }
