@@ -256,4 +256,16 @@ public class UserService{
         }
         return link;
     }
+
+    public List<UserModel> getAllFriendsList(Long userId) {
+
+        List<Friends> friendsList = friendsRepository.getFriendsByUserId(userId);
+        Set uniqueUserIds = new HashSet();
+        for(Friends friend : friendsList){
+            Long friendId = friend.getUserId1() != userId ? friend.getUserId1() : friend.getUserId2();
+            uniqueUserIds.add(friendId);
+        }
+        List<User> users = getUsersDetailById(new ArrayList<>(uniqueUserIds));
+        return getUserInfoMapFromUsers(users);
+    }
 }

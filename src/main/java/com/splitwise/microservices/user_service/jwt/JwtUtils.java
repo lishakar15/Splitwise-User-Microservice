@@ -26,8 +26,8 @@ public class JwtUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
     public static final String SECRET = PropertiesReader.getProperty(StringConstants.SECRET);
-    public static final String JWT_EXPIRATION_TIME = PropertiesReader.getProperty(StringConstants.JWT_EXPIRATION_TIME);
-    public static final String INVITE_EXPIRATION_TIME = PropertiesReader.getProperty(StringConstants.INVITE_EXPIRATION_TIME);
+    public static final String JWT_EXPIRATION_HOURS = PropertiesReader.getProperty(StringConstants.JWT_EXPIRATION_HOURS);
+    public static final String INVITE_EXPIRATION_HOURS = PropertiesReader.getProperty(StringConstants.INVITE_EXPIRATION_HOURS);
 
     public String getJwtFromHeader(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
@@ -43,7 +43,7 @@ public class JwtUtils {
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + Integer.valueOf(JWT_EXPIRATION_TIME)))
+                .setExpiration(new Date(System.currentTimeMillis() + Integer.valueOf(JWT_EXPIRATION_HOURS) * 3600000L))
                 .signWith(key())
                 .compact();
     }
@@ -52,7 +52,7 @@ public class JwtUtils {
         return Jwts.builder()
                 .setSubject("invite")
                 .claim("type", "invite")
-                .setExpiration(new Date(System.currentTimeMillis() + Integer.valueOf(INVITE_EXPIRATION_TIME)))
+                .setExpiration(new Date(System.currentTimeMillis() + Integer.valueOf(INVITE_EXPIRATION_HOURS) * 3600000L))
                 .signWith(key())
                 .compact();
     }
