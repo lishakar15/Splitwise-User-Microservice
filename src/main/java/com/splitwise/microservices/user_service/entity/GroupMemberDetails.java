@@ -24,6 +24,8 @@ public class GroupMemberDetails {
     private Long groupId;
     @Column(name="user_id")
     private Long userId;
+    @Transient
+    private String userName;
     @Column(name="join_date")
     private Date joinedAt;
 }

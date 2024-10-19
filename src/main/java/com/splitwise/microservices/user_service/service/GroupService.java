@@ -53,7 +53,7 @@ public class GroupService {
             {
                return false;
             }
-            List<GroupMemberDetails> groupMemberDetailsList = groupMapper.getGroupMemberDetailsFromGroup(savedGroup.getGroupId(), groupRequest.getGroupMemberDetails());
+            List<GroupMemberDetails> groupMemberDetailsList = groupMapper.getGroupMemberDetailsWithGroupId(savedGroup.getGroupId(), groupRequest.getGroupMemberDetails());
             return saveGroupMembers(groupMemberDetailsList);
         }
         return false;
@@ -272,7 +272,10 @@ public class GroupService {
         if(optional.isPresent()){
             groupDetailsModel.setGroup(optional.get());
             List<GroupMemberDetails> memberDetails = groupMemberDetailsRepository.findByGroupId(groupId);
-            groupDetailsModel.setGroupMemberDetails(memberDetails);
+            List<Long> userIds = memberDetails.stream().map(u -> u.getUserId()).collect(Collectors.toList());
+            Map<Long, String> userNameMap = userService.getFullUserNamesMap(userIds);
+            List<GroupMemberDetails> memberDetailsList = groupMapper.getGroupMemberDetailsWithUserName(userNameMap, memberDetails);
+            groupDetailsModel.setGroupMemberDetails(memberDetailsList);
         }
         return groupDetailsModel;
     }

@@ -116,6 +116,15 @@ public class UserService{
         }
         return userNameMap;
     }
+    public Map<Long, String> getFullUserNamesMap(List<Long> userIds) {
+        Map<Long, String> userNameMap = new HashMap<>();
+        if (userIds != null && !userIds.isEmpty()) {
+            List<User> userList = getUsersDetailById(userIds);
+            userNameMap = userList.stream().collect(Collectors.toMap(user -> user.getUserId(),
+                    user -> user.getFirstName()+" "+user.getLastName()));
+        }
+        return userNameMap;
+    }
 
     public Map<Long, String> getUserEmailMap(List<Long> userIds) {
         Map<Long, String> userEmailMap = new HashMap<>();
