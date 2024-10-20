@@ -166,6 +166,7 @@ public class UserService{
                 loginResponse = LoginResponse.builder()
                         .jwtToken(jwtToken)
                         .userName(userDetails.getUser().getFirstName())
+                        .fullUserName(userDetails.getUser().getFirstName() +" "+ userDetails.getUser().getLastName())
                         .userId(userDetails.getUserId())
                         .build();
                 //Authentication Completed, Set the Authentication object into the Spring Context for future requests

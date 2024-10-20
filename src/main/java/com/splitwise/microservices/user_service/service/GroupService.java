@@ -60,17 +60,30 @@ public class GroupService {
     }
 
     public Boolean saveGroupMembers(List<GroupMemberDetails> groupMemberDetails) {
-        Boolean isGroupSaved = false;
+        Boolean isGroupMembersSaved = false;
         try {
             groupMemberDetailsRepository.saveAll(groupMemberDetails);
             for (GroupMemberDetails memberDetails : groupMemberDetails) {
                 createGroupMemberActivity(ActivityType.USER_ADDED, memberDetails);
             }
-            isGroupSaved = true;
+            isGroupMembersSaved = true;
         } catch (Exception ex) {
             LOGGER.error("Error occurred while saving Group Members data");
         }
-        return isGroupSaved;
+        return isGroupMembersSaved;
+    }
+    public Boolean deleteGroupMembers(List<GroupMemberDetails> groupMemberDetails) {
+        Boolean isMembersDeleted = false;
+        try {
+            groupMemberDetailsRepository.deleteAll(groupMemberDetails);
+            for (GroupMemberDetails memberDetails : groupMemberDetails) {
+                createGroupMemberActivity(ActivityType.USER_REMOVED, memberDetails);
+            }
+            isMembersDeleted = true;
+        } catch (Exception ex) {
+            LOGGER.error("Error occurred while deleting Group Members");
+        }
+        return isMembersDeleted;
     }
 
     private void createGroupMemberActivity(ActivityType activityType, GroupMemberDetails groupMemberDetails) {
@@ -287,5 +300,59 @@ public class GroupService {
         uniqueUserIds.addAll(userIds);
         List<User> users = userService.getUsersDetailById(new ArrayList<>(uniqueUserIds));
         return groupMapper.getGroupMembersFromUsers(users);
+    }
+
+    @Transactional
+    public Boolean processGroupUpdate(GroupDetailsModel groupRequest) {
+        if (groupRequest == null || groupRequest.getGroup() == null) {
+            return false;
+        }
+
+        Group newGroup = groupRequest.getGroup();
+        Long groupId = newGroup.getGroupId();
+
+        // Check if group exists
+        Optional<Group> existingGroupOptional = groupRepository.findById(groupId);
+        if (!existingGroupOptional.isPresent()) {
+            return false;
+        }
+        Group existingGroup = existingGroupOptional.get();
+
+        // Update group name if changed
+        if (!newGroup.getGroupName().equals(existingGroup.getGroupName())) {
+            existingGroup.setGroupName(newGroup.getGroupName());
+            groupRepository.save(existingGroup);
+        }
+
+        List<GroupMemberDetails> membersFromRequest = groupRequest.getGroupMemberDetails();
+        List<Long> existingMemberIds = groupMemberDetailsRepository.getAllUserIdByGroupId(groupId);
+        List<GroupMemberDetails> existingMembers = groupMemberDetailsRepository.findByGroupId(groupId);
+
+        List<GroupMemberDetails> newMembers = new ArrayList<>();
+        List<GroupMemberDetails> deletedMembers = new ArrayList<>();
+
+        for (GroupMemberDetails member : membersFromRequest) {
+            if (!existingMemberIds.contains(member.getUserId())) {
+                newMembers.add(member);
+            } else {
+                existingMemberIds.remove(member.getUserId());
+            }
+        }
+
+        for (Long deletedMemberId : existingMemberIds) {
+            existingMembers.stream()
+                    .filter(m -> m.getUserId().equals(deletedMemberId))
+                    .findFirst()
+                    .ifPresent(deletedMembers::add);
+        }
+
+        if (!newMembers.isEmpty()) {
+            saveGroupMembers(newMembers);
+        }
+
+        if (!deletedMembers.isEmpty()) {
+            deleteGroupMembers(deletedMembers);
+        }
+        return true;
     }
 }
