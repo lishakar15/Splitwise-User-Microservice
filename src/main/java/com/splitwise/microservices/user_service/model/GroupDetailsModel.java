@@ -16,5 +16,5 @@ import java.util.List;
 public class GroupDetailsModel {
 
     private Group group;
-    List<GroupMemberDetails> groupMemberDetails;
+    private List<GroupMemberDetails> groupMemberDetails;
 }

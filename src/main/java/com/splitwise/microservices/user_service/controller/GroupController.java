@@ -54,6 +54,21 @@ public class GroupController {
         GroupDetailsModel groupDetailsModel = groupService.getGroupDetailsByGroupId(groupId);
         return new ResponseEntity<>(groupDetailsModel, HttpStatus.OK);
     }
+    @PutMapping("/update-group")
+    public ResponseEntity<String> updateGroupMembers(@RequestBody GroupDetailsModel groupRequest){
+        if(groupRequest == null)
+        {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        Boolean isMembersUpdated = groupService.processGroupUpdate(groupRequest);
+        if(!isMembersUpdated)
+        {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return  new ResponseEntity<>("Group Updated Successfully",HttpStatus.OK);
+
+    }
+
 
     @PostMapping("/join-group")
     public ResponseEntity<String> joinAsGroupMember(@RequestBody GroupMemberDetails groupMemberDetails)
@@ -64,16 +79,6 @@ public class GroupController {
         }
         String groupName = groupService.joinAsGroupMember(groupMemberDetails);
         return new ResponseEntity<>("You joined group "+groupName,HttpStatus.OK);
-    }
-    @PutMapping("/update-group")
-    public ResponseEntity<String> updateGroup(@RequestBody Group group)
-    {
-        if(group == null || group.getGroupId()==null)
-        {
-            return new ResponseEntity<>("Error occurred while updating Group",HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        //Group updatedGroup = groupService.saveGroupDetails(group);
-        return new ResponseEntity<>("Group updated successfully",HttpStatus.OK);
     }
     @GetMapping("/get-all-members/{userId}")
     public ResponseEntity<List<GroupMember>> getGroupMembers(@PathVariable("userId") Long userId)
