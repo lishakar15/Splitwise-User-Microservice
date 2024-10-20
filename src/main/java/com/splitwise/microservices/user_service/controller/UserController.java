@@ -3,10 +3,7 @@ package com.splitwise.microservices.user_service.controller;
 import com.splitwise.microservices.user_service.entity.Friends;
 import com.splitwise.microservices.user_service.entity.User;
 import com.splitwise.microservices.user_service.jwt.JwtUtils;
-import com.splitwise.microservices.user_service.model.InviteLinkRequest;
-import com.splitwise.microservices.user_service.model.InviteRequest;
-import com.splitwise.microservices.user_service.model.LoginResponse;
-import com.splitwise.microservices.user_service.model.UserCredentials;
+import com.splitwise.microservices.user_service.model.*;
 import com.splitwise.microservices.user_service.configuration.CustomUserDetailService;
 import com.splitwise.microservices.user_service.service.UserService;
 import org.slf4j.Logger;
@@ -180,6 +177,14 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(userNameMap, HttpStatus.OK);
+    }
+    @GetMapping("/get-all-friends/{userId}")
+    public ResponseEntity<List<UserModel>> getAllFriendsByUserId(@PathVariable("userId") Long userId){
+        if(userId == null){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        List<UserModel>  friendsList = userService.getAllFriendsList(userId);
+        return new ResponseEntity<>(friendsList,HttpStatus.OK);
     }
 
     @GetMapping("/get-friends-name-map/{userId}")
