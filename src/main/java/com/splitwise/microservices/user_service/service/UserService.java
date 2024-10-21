@@ -6,6 +6,7 @@ import com.splitwise.microservices.user_service.entity.Friends;
 import com.splitwise.microservices.user_service.entity.User;
 import com.splitwise.microservices.user_service.exception.UserException;
 import com.splitwise.microservices.user_service.jwt.JwtUtils;
+import com.splitwise.microservices.user_service.mapper.FriendsMapper;
 import com.splitwise.microservices.user_service.mapper.UserMapper;
 import com.splitwise.microservices.user_service.model.*;
 import com.splitwise.microservices.user_service.repository.FriendsRepository;
@@ -36,6 +37,8 @@ public class UserService{
     GroupService groupService;
     @Autowired
     UserMapper userMapper;
+    @Autowired
+    FriendsMapper friendsMapper;
     @Autowired
     JwtUtils jwtUtils;
     @Autowired
@@ -271,7 +274,7 @@ public class UserService{
         return link;
     }
 
-    public List<UserModel> getAllFriendsList(Long userId) {
+    public List<UserModel> getAllFriendsInfoList(Long userId) {
 
         List<Friends> friendsList = friendsRepository.getFriendsByUserId(userId);
         Set uniqueUserIds = new HashSet();
@@ -281,5 +284,16 @@ public class UserService{
         }
         List<User> users = getUsersDetailById(new ArrayList<>(uniqueUserIds));
         return getUserInfoMapFromUsers(users);
+    }
+
+    public List<FriendsModel> getAllFriendsListByUserId(Long userId) {
+        List<Friends> friendsList = friendsRepository.getFriendsByUserId(userId);
+        Set uniqueUserIds = new HashSet();
+        for(Friends friend : friendsList){
+            Long friendId = friend.getUserId1() != userId ? friend.getUserId1() : friend.getUserId2();
+            uniqueUserIds.add(friendId);
+        }
+        List<User> users = getUsersDetailById(new ArrayList<>(uniqueUserIds));
+        return friendsMapper.getFriendsModelListFromUsers(users);
     }
 }
