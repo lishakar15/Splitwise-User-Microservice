@@ -4,6 +4,7 @@ import com.splitwise.microservices.user_service.configuration.CustomUserDetailSe
 import com.splitwise.microservices.user_service.constants.StringConstants;
 import com.splitwise.microservices.user_service.entity.Friends;
 import com.splitwise.microservices.user_service.entity.User;
+import com.splitwise.microservices.user_service.exception.UserException;
 import com.splitwise.microservices.user_service.jwt.JwtUtils;
 import com.splitwise.microservices.user_service.mapper.UserMapper;
 import com.splitwise.microservices.user_service.model.*;
@@ -188,17 +189,20 @@ public class UserService{
         return new ResponseEntity<>(loginResponse,HttpStatus.OK);
     }
 
-    public Boolean registerNewUser(User user) {
+    public Boolean registerNewUser(User user) throws UserException {
         Boolean isUserRegistered = false;
+        String emailId = user.getEmailId();
+        if(userRepository.getUserByEmailId(emailId) != null)
+        {
+            throw new UserException("This email address already registered");
+        }
         String encryptedPassword = encoder.encode(user.getPassword());
         user.setPassword(encryptedPassword);
         User savedUser = saveUser(user);
         if(savedUser != null){
             isUserRegistered = true;
         }
-
         return isUserRegistered;
-
     }
 
     public List<UserModel> getUserInfoMapFromUsers(List<User> users) {

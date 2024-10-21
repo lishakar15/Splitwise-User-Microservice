@@ -2,6 +2,7 @@ package com.splitwise.microservices.user_service.controller;
 
 import com.splitwise.microservices.user_service.entity.Friends;
 import com.splitwise.microservices.user_service.entity.User;
+import com.splitwise.microservices.user_service.exception.UserException;
 import com.splitwise.microservices.user_service.jwt.JwtUtils;
 import com.splitwise.microservices.user_service.model.*;
 import com.splitwise.microservices.user_service.configuration.CustomUserDetailService;
@@ -34,13 +35,11 @@ public class UserController {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
     @PostMapping("/register-user")
-    public ResponseEntity<String> registerUser(@RequestBody User user)
-    {
+    public ResponseEntity<String> registerUser(@RequestBody User user) throws UserException {
         if(user == null)
         {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
         Boolean isUserRegistered = userService.registerNewUser(user);
         if(isUserRegistered)
         {

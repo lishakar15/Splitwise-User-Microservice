@@ -236,8 +236,9 @@ public class GroupService {
         List<User> users = userService.getUsersDetailById(new ArrayList<>(uniqueUserIds));
         return userService.getUserInfoMapFromUsers(users);
     }
-
-    public String joinAsGroupMember(GroupMemberDetails groupMemberDetails) {
+    @Transactional
+    public Boolean joinAsGroupMember(GroupMemberDetails groupMemberDetails) {
+        Boolean isJoined = false;
         if(groupMemberDetails != null)
         {
             GroupMemberDetails existinGroupMemberDetails = groupMemberDetailsRepository.findByGroupIdAndUserId(groupMemberDetails.getGroupId(), groupMemberDetails.getUserId());
@@ -247,9 +248,10 @@ public class GroupService {
                 groupMemberDetailsRepository.save(groupMemberDetails);
                 saveFriendsFromInvite(groupMemberDetails);
                 createGroupMemberActivity(ActivityType.USER_ADDED, groupMemberDetails);
+                isJoined = true;
             }
         }
-        return getGroupNameById(groupMemberDetails.getGroupId());
+        return isJoined;
     }
 
     private void saveFriendsFromInvite(GroupMemberDetails groupMemberDetails) {

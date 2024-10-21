@@ -77,8 +77,16 @@ public class GroupController {
         {
             return new ResponseEntity<>("Invalid input to add members",HttpStatus.NOT_FOUND);
         }
-        String groupName = groupService.joinAsGroupMember(groupMemberDetails);
-        return new ResponseEntity<>("You joined group "+groupName,HttpStatus.OK);
+        Boolean isJoinedGroup =  groupService.joinAsGroupMember(groupMemberDetails);
+
+        if(isJoinedGroup)
+        {
+            String groupName = groupService.getGroupNameById(groupMemberDetails.getGroupId());
+            return new ResponseEntity<>("You joined group "+groupName,HttpStatus.OK);
+        }
+        else {
+            return new ResponseEntity<>("Invite accept failed", HttpStatus.OK);
+        }
     }
     @GetMapping("/get-all-members/{userId}")
     public ResponseEntity<List<GroupMember>> getGroupMembers(@PathVariable("userId") Long userId)
