@@ -14,6 +14,7 @@ public class UserMapper {
         List<UserModel> memberDetailsList = new ArrayList<>();
         for (User user : users) {
             UserModel userModel = UserModel.builder().firstName(user.getFirstName())
+                    .userId(user.getUserId())
                     .lastName(user.getLastName())
                     .emailId(user.getEmailId())
                     .phone(user.getPhoneNumber())

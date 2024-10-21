@@ -22,6 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -177,12 +178,20 @@ public class UserController {
         }
         return new ResponseEntity<>(userNameMap, HttpStatus.OK);
     }
-    @GetMapping("/get-all-friends/{userId}")
-    public ResponseEntity<List<UserModel>> getAllFriendsByUserId(@PathVariable("userId") Long userId){
+    @GetMapping("/get-all-friends-info/{userId}")
+    public ResponseEntity<List<UserModel>> getAllFriendsInfoByUserId(@PathVariable("userId") Long userId){
         if(userId == null){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        List<UserModel>  friendsList = userService.getAllFriendsList(userId);
+        List<UserModel>  friendsList = userService.getAllFriendsInfoList(userId);
+        return new ResponseEntity<>(friendsList,HttpStatus.OK);
+    }
+    @GetMapping("get-all-friends/{userId}")
+    public ResponseEntity<List<FriendsModel>> getFriendsListByUserId(@PathVariable("userId") Long userId){
+        if(userId == null){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        List<FriendsModel> friendsList = userService.getAllFriendsListByUserId(userId);
         return new ResponseEntity<>(friendsList,HttpStatus.OK);
     }
 

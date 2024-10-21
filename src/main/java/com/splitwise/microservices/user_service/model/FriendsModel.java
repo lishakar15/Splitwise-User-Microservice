@@ -5,14 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserModel {
+@Builder
+public class FriendsModel {
     private Long userId;
-    private String firstName;
-    private String lastName;
-    private String emailId;
-    private String phone;
+    private String userName;
 }
