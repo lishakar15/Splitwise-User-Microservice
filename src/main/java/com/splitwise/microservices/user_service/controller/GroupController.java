@@ -99,13 +99,28 @@ public class GroupController {
         return new ResponseEntity<>(groupMemberList,HttpStatus.OK);
     }
 
+    @GetMapping("/get-all-group/{userId}")
+    public ResponseEntity<List<Group>> getAllGroupsOfUser(@PathVariable("userId") Long userId)
+    {
+        if(userId ==null)
+        {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        List<Group> groupList = groupService.getAllGroupsOfUser(userId);
+        return new ResponseEntity<>(groupList,HttpStatus.OK);
+    }
+
     /**
      * This method return list groups a user participating
      * @param userId
      */
-    @GetMapping("/get-all-groups/{userId}")
+    @GetMapping("/get-all-groups-info/{userId}")
     public ResponseEntity<List<GroupDataResponse>> getAllTheGroupOfUser(@PathVariable("userId") Long userId)
     {
+        if(userId ==null)
+        {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         List<Long> groupIds = groupService.getAllGroupIdsOfUser(userId);
         if(groupIds == null || groupIds.isEmpty())
         {

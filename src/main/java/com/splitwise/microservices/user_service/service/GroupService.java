@@ -357,4 +357,14 @@ public class GroupService {
         }
         return true;
     }
+
+    public List<Group> getAllGroupsOfUser(Long userId) {
+        List<Group> groupList = null;
+        List<Long> groupIds = getAllGroupIdsOfUser(userId);
+        if(groupIds != null && !groupIds.isEmpty())
+        {
+            groupList = groupRepository.findByGroupIdIn(groupIds);
+        }
+        return groupList;
+    }
 }
